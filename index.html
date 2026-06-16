@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>File Tools</title>
-  <script src="https://cdn.jsdelivr.net/npm/heic-to@1.4.2/dist/iife/heic-to.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -95,6 +94,7 @@
     .radio-row span { font-size:0.84rem; }
     .no-fields { text-align:center; padding:1.5rem 1rem; font-size:0.84rem; color:var(--text-muted); background:var(--surface2); border-radius:var(--r); border:0.5px dashed var(--border-md); }
     .form-divider { height:0.5px; background:var(--border); }
+    .compat-note { font-size:0.75rem; color:var(--text-faint); margin-top:0.75rem; padding:8px 10px; background:var(--surface2); border-radius:var(--r); line-height:1.5; }
     footer { margin-top:2.5rem; font-size:0.76rem; color:var(--text-faint); text-align:center; }
   </style>
 </head>
@@ -135,6 +135,7 @@
       </button>
     </div>
     <div class="summary" id="heic-summary"></div>
+    <p class="compat-note">⚠️ Uses your browser's built-in HEIC support. Works best on <strong>Safari</strong> (macOS/iOS). Chrome and Firefox may show errors — in that case, use Safari or the macOS Photos app to convert first.</p>
   </div>
 </div>
 
@@ -201,18 +202,20 @@
 <footer>All processing happens in your browser · No data leaves your device</footer>
 
 <script>
-/* ── Shared ── */
+/* ── Tab switching ── */
 function switchTab(name, btn) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
   btn.classList.add('active');
 }
+
+/* ── Shared helpers ── */
 function fmtSize(b) { return b < 1048576 ? Math.round(b/1024)+' KB' : (b/1048576).toFixed(1)+' MB'; }
 const DL = `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
 async function triggerDownloads(items) {
-  for (const {url,name} of items) {
-    const a = document.createElement('a'); a.href=url; a.download=name; a.click();
+  for (const {url, name} of items) {
+    const a = document.createElement('a'); a.href = url; a.download = name; a.click();
     await new Promise(r => setTimeout(r, 160));
   }
 }
@@ -226,21 +229,23 @@ function setupDropzone(dropId, inputId, onFiles) {
   inp.addEventListener('change', () => { onFiles([...inp.files]); inp.value = ''; });
 }
 
-/* ══ HEIC → JPG ══ */
-(function(){
-  const list=document.getElementById('heic-list'), btn=document.getElementById('heic-btn'),
-        dlAll=document.getElementById('heic-dl-all'), sum=document.getElementById('heic-summary'),
-        qual=document.getElementById('heic-quality'), qout=document.getElementById('heic-qout');
-  let files=[], results={};
+/* ══ HEIC → JPG (uses native browser createImageBitmap) ══ */
+(function() {
+  const list = document.getElementById('heic-list');
+  const btn  = document.getElementById('heic-btn');
+  const dlAll = document.getElementById('heic-dl-all');
+  const sum  = document.getElementById('heic-summary');
+  const qual = document.getElementById('heic-quality');
+  const qout = document.getElementById('heic-qout');
+  let files = [], results = {};
 
   qual.addEventListener('input', () => qout.textContent = qual.value + '%');
-
   setupDropzone('heic-drop', 'heic-input', add);
 
   function add(newFiles) {
     const heics = newFiles.filter(f => /\.heic$/i.test(f.name) || f.type === 'image/heic' || f.type === 'image/heif');
     if (!heics.length) { sum.textContent = 'No .heic files found.'; return; }
-    heics.forEach(f => { if (!files.find(x => x.name===f.name && x.size===f.size)) files.push(f); });
+    heics.forEach(f => { if (!files.find(x => x.name === f.name && x.size === f.size)) files.push(f); });
     results = {}; render(); btn.disabled = false; sum.textContent = ''; dlAll.style.display = 'none';
   }
 
@@ -250,12 +255,30 @@ function setupDropzone(dropId, inputId, onFiles) {
       const res = results[i];
       let badge = '<span class="badge b-wait">Waiting</span>';
       if (res === 'converting') badge = '<span class="badge b-prog">Converting…</span>';
-      else if (res === 'error') badge = '<span class="badge b-err">Error</span>';
-      else if (res && res.url)  badge = '<span class="badge b-done">Done</span>';
-      let dl = (res && res.url) ? `<a class="dl-btn" href="${res.url}" download="${res.name}">${DL} Save</a>` : '';
+      else if (res === 'error')  badge = '<span class="badge b-err">Error</span>';
+      else if (res && res.url)   badge = '<span class="badge b-done">Done</span>';
+      const dl = (res && res.url) ? `<a class="dl-btn" href="${res.url}" download="${res.name}">${DL} Save</a>` : '';
       const row = document.createElement('div'); row.className = 'file-row';
       row.innerHTML = `<span class="name" title="${f.name}">${f.name}</span><span class="sz">${fmtSize(f.size)}</span>${badge}${dl}`;
       list.appendChild(row);
+    });
+  }
+
+  async function convertWithCanvas(file, quality) {
+    // Uses the browser's native image decoding — works on Safari/iOS for HEIC
+    const bitmap = await createImageBitmap(file);
+    const canvas = document.createElement('canvas');
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(bitmap, 0, 0);
+    bitmap.close();
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(
+        blob => blob ? resolve(blob) : reject(new Error('Canvas toBlob returned null')),
+        'image/jpeg',
+        quality
+      );
     });
   }
 
@@ -263,22 +286,23 @@ function setupDropzone(dropId, inputId, onFiles) {
     if (!files.length) return;
     btn.disabled = true; dlAll.style.display = 'none'; sum.textContent = 'Converting…';
     const q = parseInt(qual.value) / 100;
+
     for (let i = 0; i < files.length; i++) {
       if (results[i] && results[i].url) continue;
       results[i] = 'converting'; render();
       try {
-        let blob = await HeicTo.heicTo({ blob: files[i], type: 'image/jpeg', quality: q });
-        if (Array.isArray(blob)) blob = blob[0];
+        const blob = await convertWithCanvas(files[i], q);
         results[i] = { url: URL.createObjectURL(blob), name: files[i].name.replace(/\.heic$/i, '.jpg') };
-      } catch(e) {
-        console.error('heic-to error', e);
+      } catch (e) {
+        console.error('HEIC conversion error:', e);
         results[i] = 'error';
       }
       render();
     }
+
     const done = Object.values(results).filter(r => r && r.url).length;
     const err  = Object.values(results).filter(r => r === 'error').length;
-    sum.textContent = `${done} converted${err ? `, ${err} failed` : ''}.`;
+    sum.textContent = `${done} converted${err ? `, ${err} failed — try Safari if on a non-Apple browser` : ''}.`;
     btn.disabled = false;
     if (done > 1) dlAll.style.display = 'flex';
   });
@@ -287,17 +311,18 @@ function setupDropzone(dropId, inputId, onFiles) {
 })();
 
 /* ══ MERGE PDFs ══ */
-(function(){
-  const list=document.getElementById('merge-list'), btn=document.getElementById('merge-btn'),
-        sum=document.getElementById('merge-summary');
-  let files=[], dragSrc=null;
+(function() {
+  const list = document.getElementById('merge-list');
+  const btn  = document.getElementById('merge-btn');
+  const sum  = document.getElementById('merge-summary');
+  let files = [], dragSrc = null;
 
   setupDropzone('merge-drop', 'merge-input', add);
 
   function add(newFiles) {
     const pdfs = newFiles.filter(f => /\.pdf$/i.test(f.name) || f.type === 'application/pdf');
     if (!pdfs.length) { sum.textContent = 'No PDF files found.'; return; }
-    pdfs.forEach(f => { if (!files.find(x => x.name===f.name && x.size===f.size)) files.push(f); });
+    pdfs.forEach(f => { if (!files.find(x => x.name === f.name && x.size === f.size)) files.push(f); });
     render(); btn.disabled = files.length < 2; sum.textContent = '';
   }
 
@@ -346,11 +371,13 @@ function setupDropzone(dropId, inputId, onFiles) {
 })();
 
 /* ══ SPLIT PDF ══ */
-(function(){
-  const list=document.getElementById('split-list'), btn=document.getElementById('split-btn'),
-        dlAll=document.getElementById('split-dl-all'), sum=document.getElementById('split-summary'),
-        hint=document.getElementById('split-hint');
-  let curFile=null, pageCount=0, splitResults=[], rangeInputs=[];
+(function() {
+  const list = document.getElementById('split-list');
+  const btn  = document.getElementById('split-btn');
+  const dlAll = document.getElementById('split-dl-all');
+  const sum  = document.getElementById('split-summary');
+  const hint = document.getElementById('split-hint');
+  let curFile = null, pageCount = 0, splitResults = [], rangeInputs = [];
 
   setupDropzone('split-drop', 'split-input', files => loadFile(files[0]));
 
@@ -436,10 +463,12 @@ function setupDropzone(dropId, inputId, onFiles) {
 })();
 
 /* ══ PDF FORM FILLER ══ */
-(function(){
-  const area=document.getElementById('form-fields-area'), btn=document.getElementById('form-btn'),
-        actions=document.getElementById('form-actions'), sum=document.getElementById('form-summary');
-  let curFile=null, fieldDefs=[];
+(function() {
+  const area    = document.getElementById('form-fields-area');
+  const btn     = document.getElementById('form-btn');
+  const actions = document.getElementById('form-actions');
+  const sum     = document.getElementById('form-summary');
+  let curFile = null, fieldDefs = [];
 
   setupDropzone('form-drop', 'form-input', files => loadForm(files[0]));
 
