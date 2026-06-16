@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>File Tools</title>
-  <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/heic-to@1.4.2/dist/iife/heic-to.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -267,11 +267,11 @@ function setupDropzone(dropId, inputId, onFiles) {
       if (results[i] && results[i].url) continue;
       results[i] = 'converting'; render();
       try {
-        let blob = await heic2any({ blob: files[i], toType: 'image/jpeg', quality: q });
+        let blob = await HeicTo.heicTo({ blob: files[i], type: 'image/jpeg', quality: q });
         if (Array.isArray(blob)) blob = blob[0];
         results[i] = { url: URL.createObjectURL(blob), name: files[i].name.replace(/\.heic$/i, '.jpg') };
       } catch(e) {
-        console.error('heic2any error', e);
+        console.error('heic-to error', e);
         results[i] = 'error';
       }
       render();
