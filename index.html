@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HEIC → JPG Converter</title>
+  <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -107,7 +108,7 @@
 
 <header>
   <h1>HEIC → JPG</h1>
-  <p>Convert photos instantly — works in any browser</p>
+  <p>Convert photos locally — nothing is uploaded to any server</p>
 </header>
 
 <div class="card">
@@ -124,7 +125,7 @@
 
   <div class="quality-row">
     <label for="quality">JPG quality</label>
-    <input type="range" id="quality" min="1" max="100" step="1" value="90">
+    <input type="range" id="quality" min="50" max="100" step="1" value="90">
     <span class="qout" id="qout">90%</span>
   </div>
 
@@ -144,7 +145,7 @@
   <div class="summary" id="summary"></div>
 </div>
 
-<footer>Files are converted on your own server and never stored. No data is retained.</footer>
+<footer>All processing happens in your browser. No data leaves your device.</footer>
 
 <script>
   var dropzone   = document.getElementById('dropzone');
@@ -165,8 +166,13 @@
   dropzone.addEventListener('click', function() { fileInput.click(); });
   dropzone.addEventListener('dragover', function(e) { e.preventDefault(); dropzone.classList.add('over'); });
   dropzone.addEventListener('dragleave', function() { dropzone.classList.remove('over'); });
-  dropzone.addEventListener('drop', function(e) { e.preventDefault(); dropzone.classList.remove('over'); addFiles(Array.from(e.dataTransfer.files)); });
-  fileInput.addEventListener('change', function() { addFiles(Array.from(fileInput.files)); fileInput.value = ''; });
+  dropzone.addEventListener('drop', function(e) {
+    e.preventDefault(); dropzone.classList.remove('over');
+    addFiles(Array.from(e.dataTransfer.files));
+  });
+  fileInput.addEventListener('change', function() {
+    addFiles(Array.from(fileInput.files)); fileInput.value = '';
+  });
 
   function fmtSize(b) {
     return b < 1048576 ? Math.round(b / 1024) + ' KB' : (b / 1048576).toFixed(1) + ' MB';
@@ -178,9 +184,15 @@
     });
     if (!heics.length) { summary.textContent = 'No .heic files found in that selection.'; return; }
     heics.forEach(function(f) {
-      if (!files.find(function(x) { return x.name === f.name && x.size === f.size; })) files.push(f);
+      if (!files.find(function(x) { return x.name === f.name && x.size === f.size; })) {
+        files.push(f);
+      }
     });
-    results = {}; renderList(); convertBtn.disabled = false; summary.textContent = ''; dlAllBtn.style.display = 'none';
+    results = {};
+    renderList();
+    convertBtn.disabled = false;
+    summary.textContent = '';
+    dlAllBtn.style.display = 'none';
   }
 
   function renderList() {
@@ -191,18 +203,23 @@
       if (res === 'converting') badge = '<span class="badge b-prog">Converting…</span>';
       else if (res === 'error')  badge = '<span class="badge b-err">Error</span>';
       else if (res && res.url)   badge = '<span class="badge b-done">Done</span>';
-      var dl = (res && res.url) ? '<a class="dl-btn" href="' + res.url + '" download="' + res.name + '">' + DL_ICON + ' Save</a>' : '';
+      var dl = (res && res.url)
+        ? '<a class="dl-btn" href="' + res.url + '" download="' + res.name + '">' + DL_ICON + ' Save</a>'
+        : '';
       var row = document.createElement('div');
       row.className = 'file-row';
-      row.innerHTML = '<span class="name" title="' + f.name + '">' + f.name + '</span><span class="sz">' + fmtSize(f.size) + '</span>' + badge + dl;
+      row.innerHTML = '<span class="name" title="' + f.name + '">' + f.name + '</span>'
+        + '<span class="sz">' + fmtSize(f.size) + '</span>' + badge + dl;
       fileList.appendChild(row);
     });
   }
 
   convertBtn.addEventListener('click', function() {
     if (!files.length) return;
-    convertBtn.disabled = true; dlAllBtn.style.display = 'none'; summary.textContent = 'Converting…';
-    var quality = parseInt(qualSlider.value);
+    convertBtn.disabled = true;
+    dlAllBtn.style.display = 'none';
+    summary.textContent = 'Converting…';
+    var q = parseInt(qualSlider.value) / 100;
     var i = 0;
 
     function next() {
@@ -215,31 +232,24 @@
         return;
       }
       if (results[i] && results[i].url) { i++; next(); return; }
-
-      results[i] = 'converting'; renderList();
-      var file = files[i];
-      var outName = file.name.replace(/\.heic$/i, '.jpg');
-
-      fetch('/api/convert?quality=' + quality, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/octet-stream' },
-        body: file
-      })
-      .then(function(res) {
-        if (!res.ok) throw new Error('Server error ' + res.status);
-        return res.blob();
-      })
-      .then(function(blob) {
-        results[i] = { url: URL.createObjectURL(blob), name: outName };
-        i++; renderList(); next();
-      })
-      .catch(function(err) {
-        console.error('Conversion error:', err);
-        results[i] = 'error';
-        i++; renderList(); next();
-      });
+      results[i] = 'converting';
+      renderList();
+      var currentFile = files[i];
+      heic2any({ blob: currentFile, toType: 'image/jpeg', quality: q })
+        .then(function(blob) {
+          if (Array.isArray(blob)) blob = blob[0];
+          results[i] = {
+            url: URL.createObjectURL(blob),
+            name: currentFile.name.replace(/\.heic$/i, '.jpg')
+          };
+          i++; renderList(); next();
+        })
+        .catch(function(e) {
+          console.error('heic2any error:', e);
+          results[i] = 'error';
+          i++; renderList(); next();
+        });
     }
-
     next();
   });
 
@@ -248,8 +258,12 @@
     var i = 0;
     function next() {
       if (i >= items.length) return;
-      var a = document.createElement('a'); a.href = items[i].url; a.download = items[i].name; a.click();
-      i++; setTimeout(next, 160);
+      var a = document.createElement('a');
+      a.href = items[i].url;
+      a.download = items[i].name;
+      a.click();
+      i++;
+      setTimeout(next, 160);
     }
     next();
   });
