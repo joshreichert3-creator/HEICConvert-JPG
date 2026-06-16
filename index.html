@@ -7,48 +7,106 @@
   <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
-      --bg: #f7f6f3; --surface: #ffffff; --surface2: #f1f0ec;
-      --border: rgba(0,0,0,0.11); --border-md: rgba(0,0,0,0.20);
-      --text: #1a1a18; --text-muted: #6b6b67; --text-faint: #9e9e9a;
-      --blue-bg: #e6f1fb; --blue-text: #0c447c;
-      --green-bg: #eaf3de; --green-text: #3b6d11;
-      --red-bg: #fcebeb; --red-text: #a32d2d;
-      --radius: 10px; --radius-lg: 14px;
+      --bg: #f7f6f3;
+      --surface: #ffffff;
+      --surface2: #f1f0ec;
+      --border: rgba(0,0,0,0.12);
+      --border-md: rgba(0,0,0,0.22);
+      --text: #1a1a18;
+      --text-muted: #6b6b67;
+      --text-faint: #9e9e9a;
+      --blue-bg: #e6f1fb;
+      --blue-text: #0c447c;
+      --green-bg: #eaf3de;
+      --green-text: #3b6d11;
+      --red-bg: #fcebeb;
+      --red-text: #a32d2d;
+      --radius: 10px;
+      --radius-lg: 14px;
     }
-    @media (prefers-color-scheme: dark) { :root {
-      --bg: #1a1a18; --surface: #242422; --surface2: #2e2e2b;
-      --border: rgba(255,255,255,0.09); --border-md: rgba(255,255,255,0.18);
-      --text: #f0efe9; --text-muted: #a0a09a; --text-faint: #68685f;
-      --blue-bg: #042c53; --blue-text: #b5d4f4;
-      --green-bg: #173404; --green-text: #c0dd97;
-      --red-bg: #501313; --red-text: #f7c1c1;
-    }}
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a1a18;
+        --surface: #242422;
+        --surface2: #2e2e2b;
+        --border: rgba(255,255,255,0.10);
+        --border-md: rgba(255,255,255,0.20);
+        --text: #f0efe9;
+        --text-muted: #a0a09a;
+        --text-faint: #68685f;
+        --blue-bg: #042c53;
+        --blue-text: #b5d4f4;
+        --green-bg: #173404;
+        --green-text: #c0dd97;
+        --red-bg: #501313;
+        --red-text: #f7c1c1;
+      }
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg); color: var(--text);
-      min-height: 100vh; display: flex; flex-direction: column;
-      align-items: center; padding: 3rem 1rem 4rem;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1rem 4rem;
     }
-    header { text-align: center; margin-bottom: 2rem; }
-    header h1 { font-size: 1.75rem; font-weight: 600; letter-spacing: -0.02em; }
-    header p { margin-top: 0.4rem; font-size: 0.9rem; color: var(--text-muted); }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    header h1 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    header p {
+      margin-top: 0.4rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
     .card {
-      background: var(--surface); border: 0.5px solid var(--border);
-      border-radius: var(--radius-lg); padding: 1.5rem;
-      width: 100%; max-width: 560px;
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 560px;
     }
-    .dropzone {
-      border: 1.5px dashed var(--border-md); border-radius: var(--radius);
-      padding: 2.5rem 1.5rem; text-align: center; cursor: pointer;
-      transition: background 0.15s, border-color 0.15s; background: var(--surface2);
+
+    #dropzone {
+      border: 1.5px dashed var(--border-md);
+      border-radius: var(--radius);
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      background: var(--surface2);
     }
-    .dropzone:hover, .dropzone.over { border-color: #378add; background: var(--blue-bg); }
-    .dropzone svg { width: 36px; height: 36px; stroke: var(--text-muted); margin: 0 auto 10px; display: block; }
-    .dropzone p { font-size: 0.9rem; color: var(--text-muted); }
-    .dropzone span { font-size: 0.78rem; color: var(--text-faint); margin-top: 4px; display: block; }
-    input[type=file] { display: none; }
-    .quality-row { display: flex; align-items: center; gap: 12px; margin-top: 1.25rem; }
+    #dropzone:hover, #dropzone.over {
+      border-color: #378add;
+      background: var(--blue-bg);
+    }
+    #dropzone svg {
+      width: 36px; height: 36px;
+      stroke: var(--text-muted);
+      margin-bottom: 10px;
+    }
+    #dropzone p { font-size: 0.9rem; color: var(--text-muted); }
+    #dropzone span { font-size: 0.78rem; color: var(--text-faint); margin-top: 4px; display: block; }
+    #file-input { display: none; }
+
+    .quality-row {
+      display: flex; align-items: center; gap: 12px;
+      margin-top: 1.25rem;
+    }
     .quality-row label { font-size: 0.82rem; color: var(--text-muted); white-space: nowrap; }
     .quality-row input[type=range] {
       flex: 1; -webkit-appearance: none; height: 4px;
@@ -58,50 +116,78 @@
       -webkit-appearance: none; width: 16px; height: 16px;
       border-radius: 50%; background: var(--text); cursor: pointer;
     }
-    .qout { font-size: 0.82rem; font-weight: 500; min-width: 34px; text-align: right; }
-    .file-list { margin-top: 1.25rem; display: flex; flex-direction: column; gap: 7px; }
+    #quality-out { font-size: 0.82rem; font-weight: 500; min-width: 34px; text-align: right; }
+
+    #file-list { margin-top: 1.25rem; display: flex; flex-direction: column; gap: 7px; }
+
     .file-row {
-      background: var(--surface2); border: 0.5px solid var(--border);
-      border-radius: var(--radius); padding: 9px 13px;
+      background: var(--surface2);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 9px 13px;
       display: flex; align-items: center; gap: 10px;
     }
-    .file-row .name { flex: 1; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-row .name {
+      flex: 1; font-size: 0.85rem;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
     .file-row .sz { font-size: 0.75rem; color: var(--text-faint); white-space: nowrap; }
-    .badge { font-size: 0.72rem; font-weight: 500; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
-    .b-wait { background: var(--surface2); color: var(--text-muted); border: 0.5px solid var(--border); }
-    .b-prog { background: var(--blue-bg); color: var(--blue-text); }
-    .b-done { background: var(--green-bg); color: var(--green-text); }
-    .b-err  { background: var(--red-bg);  color: var(--red-text); }
+
+    .badge {
+      font-size: 0.72rem; font-weight: 500; padding: 3px 8px;
+      border-radius: 6px; white-space: nowrap;
+    }
+    .b-wait  { background: var(--surface2);  color: var(--text-muted); border: 0.5px solid var(--border); }
+    .b-prog  { background: var(--blue-bg);   color: var(--blue-text);  }
+    .b-done  { background: var(--green-bg);  color: var(--green-text); }
+    .b-err   { background: var(--red-bg);    color: var(--red-text);   }
+
     .dl-btn {
-      display: inline-flex; align-items: center; gap: 5px;
+      display: flex; align-items: center; gap: 5px;
       background: none; border: 0.5px solid var(--border-md);
-      border-radius: 7px; padding: 4px 10px; font-size: 0.76rem;
-      cursor: pointer; color: var(--text); text-decoration: none;
-      white-space: nowrap; transition: background 0.1s; font-family: inherit;
+      border-radius: 7px; padding: 4px 10px;
+      font-size: 0.76rem; cursor: pointer; color: var(--text);
+      text-decoration: none; white-space: nowrap;
+      transition: background 0.1s;
     }
     .dl-btn:hover { background: var(--surface2); }
     .dl-btn svg { width: 13px; height: 13px; stroke: currentColor; }
+
     .actions { display: flex; gap: 10px; margin-top: 1.25rem; }
-    .primary-btn {
-      flex: 1; padding: 10px; font-size: 0.88rem; font-weight: 500;
+
+    #convert-btn {
+      flex: 1; padding: 10px;
+      font-size: 0.88rem; font-weight: 500;
       border-radius: var(--radius); cursor: pointer;
       border: 0.5px solid var(--border-md);
       background: var(--surface); color: var(--text);
-      transition: background 0.1s; font-family: inherit;
+      transition: background 0.1s;
     }
-    .primary-btn:hover:not(:disabled) { background: var(--surface2); }
-    .primary-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .dl-all-btn {
+    #convert-btn:hover:not(:disabled) { background: var(--surface2); }
+    #convert-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    #dl-all-btn {
       display: none; align-items: center; gap: 6px;
-      padding: 10px 16px; font-size: 0.88rem; border-radius: var(--radius);
-      cursor: pointer; border: 0.5px solid var(--border-md);
+      padding: 10px 16px; font-size: 0.88rem;
+      border-radius: var(--radius); cursor: pointer;
+      border: 0.5px solid var(--border-md);
       background: var(--surface); color: var(--text);
-      transition: background 0.1s; font-family: inherit;
+      transition: background 0.1s;
     }
-    .dl-all-btn:hover { background: var(--surface2); }
-    .dl-all-btn svg { width: 15px; height: 15px; stroke: currentColor; }
-    .summary { font-size: 0.8rem; color: var(--text-muted); margin-top: 10px; min-height: 18px; text-align: center; }
-    footer { margin-top: 2.5rem; font-size: 0.78rem; color: var(--text-faint); text-align: center; }
+    #dl-all-btn:hover { background: var(--surface2); }
+    #dl-all-btn svg { width: 15px; height: 15px; stroke: currentColor; }
+
+    #summary {
+      font-size: 0.8rem; color: var(--text-muted);
+      margin-top: 10px; min-height: 16px; text-align: center;
+    }
+
+    footer {
+      margin-top: 2.5rem;
+      font-size: 0.78rem;
+      color: var(--text-faint);
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -112,10 +198,9 @@
 </header>
 
 <div class="card">
-  <div class="dropzone" id="dropzone">
+  <div id="dropzone" onclick="document.getElementById('file-input').click()">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3" y="3" width="18" height="18" rx="2"/>
-      <circle cx="8.5" cy="8.5" r="1.5"/>
+      <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
       <polyline points="21 15 16 10 5 21"/>
     </svg>
     <p>Drop .heic files here, or click to browse</p>
@@ -124,123 +209,114 @@
   <input type="file" id="file-input" accept=".heic,.HEIC,image/heic,image/heif" multiple>
 
   <div class="quality-row">
-    <label for="quality">JPG quality</label>
-    <input type="range" id="quality" min="50" max="100" step="1" value="90">
-    <span class="qout" id="qout">90%</span>
+    <label for="quality-slider">JPG quality</label>
+    <input type="range" id="quality-slider" min="50" max="100" step="1" value="90">
+    <span id="quality-out">90%</span>
   </div>
 
-  <div class="file-list" id="file-list"></div>
+  <div id="file-list"></div>
 
   <div class="actions">
-    <button class="primary-btn" id="convert-btn" disabled>Convert all</button>
-    <button class="dl-all-btn" id="dl-all-btn">
+    <button id="convert-btn" disabled>Convert all</button>
+    <button id="dl-all-btn">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-        <polyline points="7 10 12 15 17 10"/>
-        <line x1="12" y1="15" x2="12" y2="3"/>
+        <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
       </svg>
       Download all
     </button>
   </div>
-  <div class="summary" id="summary"></div>
+  <div id="summary"></div>
 </div>
 
 <footer>All processing happens in your browser. No data leaves your device.</footer>
 
 <script>
-  var dropzone   = document.getElementById('dropzone');
-  var fileInput  = document.getElementById('file-input');
-  var fileList   = document.getElementById('file-list');
-  var convertBtn = document.getElementById('convert-btn');
-  var dlAllBtn   = document.getElementById('dl-all-btn');
-  var summary    = document.getElementById('summary');
-  var qualSlider = document.getElementById('quality');
-  var qualOut    = document.getElementById('qout');
+const dropzone   = document.getElementById('dropzone');
+const fileInput  = document.getElementById('file-input');
+const fileList   = document.getElementById('file-list');
+const convertBtn = document.getElementById('convert-btn');
+const dlAllBtn   = document.getElementById('dl-all-btn');
+const summary    = document.getElementById('summary');
+const qualSlider = document.getElementById('quality-slider');
+const qualOut    = document.getElementById('quality-out');
 
-  var files = [], results = {};
+let files = [], results = {};
 
-  var DL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+qualSlider.oninput = () => qualOut.textContent = qualSlider.value + '%';
 
-  qualSlider.oninput = function() { qualOut.textContent = qualSlider.value + '%'; };
+dropzone.ondragover = e => { e.preventDefault(); dropzone.classList.add('over'); };
+dropzone.ondragleave = () => dropzone.classList.remove('over');
+dropzone.ondrop = e => { e.preventDefault(); dropzone.classList.remove('over'); addFiles([...e.dataTransfer.files]); };
+fileInput.onchange = () => { addFiles([...fileInput.files]); fileInput.value = ''; };
 
-  dropzone.addEventListener('click', function() { fileInput.click(); });
-  dropzone.addEventListener('dragover', function(e) { e.preventDefault(); dropzone.classList.add('over'); });
-  dropzone.addEventListener('dragleave', function() { dropzone.classList.remove('over'); });
-  dropzone.addEventListener('drop', function(e) { e.preventDefault(); dropzone.classList.remove('over'); addFiles(Array.from(e.dataTransfer.files)); });
-  fileInput.addEventListener('change', function() { addFiles(Array.from(fileInput.files)); fileInput.value = ''; });
+function addFiles(newFiles) {
+  const heics = newFiles.filter(f => /\.heic$/i.test(f.name) || f.type === 'image/heic' || f.type === 'image/heif');
+  if (!heics.length) { summary.textContent = 'No .heic files found in that selection.'; return; }
+  heics.forEach(f => { if (!files.find(x => x.name === f.name && x.size === f.size)) files.push(f); });
+  renderList(); convertBtn.disabled = false; summary.textContent = ''; dlAllBtn.style.display = 'none';
+}
 
-  function fmtSize(b) {
-    return b < 1048576 ? Math.round(b / 1024) + ' KB' : (b / 1048576).toFixed(1) + ' MB';
-  }
+function fmtSize(b) {
+  if (b < 1048576) return Math.round(b / 1024) + ' KB';
+  return (b / 1048576).toFixed(1) + ' MB';
+}
 
-  function addFiles(newFiles) {
-    var heics = newFiles.filter(function(f) {
-      return /\.heic$/i.test(f.name) || f.type === 'image/heic' || f.type === 'image/heif';
-    });
-    if (!heics.length) { summary.textContent = 'No .heic files found in that selection.'; return; }
-    heics.forEach(function(f) {
-      if (!files.find(function(x) { return x.name === f.name && x.size === f.size; })) files.push(f);
-    });
-    results = {}; renderList(); convertBtn.disabled = false; summary.textContent = ''; dlAllBtn.style.display = 'none';
-  }
+function renderList() {
+  fileList.innerHTML = '';
+  files.forEach((f, i) => {
+    const res = results[i];
+    let badge = '<span class="badge b-wait">Waiting</span>';
+    if (res === 'converting') badge = '<span class="badge b-prog">Converting…</span>';
+    else if (res === 'error')  badge = '<span class="badge b-err">Error</span>';
+    else if (res?.url)         badge = '<span class="badge b-done">Done</span>';
 
-  function renderList() {
-    fileList.innerHTML = '';
-    files.forEach(function(f, i) {
-      var res = results[i];
-      var badge = '<span class="badge b-wait">Waiting</span>';
-      if (res === 'converting') badge = '<span class="badge b-prog">Converting…</span>';
-      else if (res === 'error')  badge = '<span class="badge b-err">Error</span>';
-      else if (res && res.url)   badge = '<span class="badge b-done">Done</span>';
-      var dl = (res && res.url) ? '<a class="dl-btn" href="' + res.url + '" download="' + res.name + '">' + DL_ICON + ' Save</a>' : '';
-      var row = document.createElement('div');
-      row.className = 'file-row';
-      row.innerHTML = '<span class="name" title="' + f.name + '">' + f.name + '</span><span class="sz">' + fmtSize(f.size) + '</span>' + badge + dl;
-      fileList.appendChild(row);
-    });
-  }
+    let dl = '';
+    if (res?.url) dl = `<a class="dl-btn" href="${res.url}" download="${res.name}">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>Save</a>`;
 
-  convertBtn.addEventListener('click', function() {
-    if (!files.length) return;
-    convertBtn.disabled = true; dlAllBtn.style.display = 'none'; summary.textContent = 'Converting…';
-    var q = parseInt(qualSlider.value) / 100;
-    var i = 0;
-    function next() {
-      if (i >= files.length) {
-        var done = Object.values(results).filter(function(r) { return r && r.url; }).length;
-        var err  = Object.values(results).filter(function(r) { return r === 'error'; }).length;
-        summary.textContent = done + ' converted' + (err ? ', ' + err + ' failed' : '') + '.';
-        convertBtn.disabled = false;
-        if (done > 1) dlAllBtn.style.display = 'flex';
-        return;
-      }
-      if (results[i] && results[i].url) { i++; next(); return; }
-      results[i] = 'converting'; renderList();
-      heic2any({ blob: files[i], toType: 'image/jpeg', quality: q })
-        .then(function(blob) {
-          if (Array.isArray(blob)) blob = blob[0];
-          results[i] = { url: URL.createObjectURL(blob), name: files[i].name.replace(/\.heic$/i, '.jpg') };
-          i++; renderList(); next();
-        })
-        .catch(function(e) {
-          console.error('heic2any error:', e);
-          results[i] = 'error';
-          i++; renderList(); next();
-        });
-    }
-    next();
+    const row = document.createElement('div');
+    row.className = 'file-row';
+    row.innerHTML = `<span class="name" title="${f.name}">${f.name}</span>
+      <span class="sz">${fmtSize(f.size)}</span>${badge}${dl}`;
+    fileList.appendChild(row);
   });
+}
 
-  dlAllBtn.addEventListener('click', function() {
-    var items = Object.values(results).filter(function(r) { return r && r.url; });
-    var i = 0;
-    function next() {
-      if (i >= items.length) return;
-      var a = document.createElement('a'); a.href = items[i].url; a.download = items[i].name; a.click();
-      i++; setTimeout(next, 160);
-    }
-    next();
-  });
+convertBtn.onclick = async () => {
+  if (!files.length) return;
+  convertBtn.disabled = true; dlAllBtn.style.display = 'none';
+  summary.textContent = 'Converting…';
+  const quality = parseInt(qualSlider.value) / 100;
+
+  for (let i = 0; i < files.length; i++) {
+    if (results[i]?.url) continue;
+    results[i] = 'converting'; renderList();
+    try {
+      let blob = await heic2any({ blob: files[i], toType: 'image/jpeg', quality });
+      if (Array.isArray(blob)) blob = blob[0];
+      results[i] = { url: URL.createObjectURL(blob), name: files[i].name.replace(/\.heic$/i, '.jpg') };
+    } catch { results[i] = 'error'; }
+    renderList();
+  }
+
+  const done = Object.values(results).filter(r => r?.url).length;
+  const err  = Object.values(results).filter(r => r === 'error').length;
+  summary.textContent = `${done} converted${err ? `, ${err} failed` : ''}.`;
+  convertBtn.disabled = false;
+  if (done > 1) dlAllBtn.style.display = 'flex';
+};
+
+dlAllBtn.onclick = async () => {
+  for (const res of Object.values(results)) {
+    if (!res?.url) continue;
+    const a = document.createElement('a'); a.href = res.url; a.download = res.name; a.click();
+    await new Promise(r => setTimeout(r, 150));
+  }
+};
 </script>
 </body>
 </html>
