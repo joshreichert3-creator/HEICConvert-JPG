@@ -6,7 +6,6 @@
   <title>File Tools</title>
   <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -31,13 +30,13 @@
     header h1 { font-size:1.6rem; font-weight:600; letter-spacing:-0.02em; }
     header p { margin-top:0.35rem; font-size:0.85rem; color:var(--text-muted); }
     .tabs { display:flex; gap:4px; background:var(--surface2); border:0.5px solid var(--border); border-radius:var(--r); padding:4px; margin-bottom:1.5rem; width:100%; max-width:580px; }
-    .tab-btn { flex:1; padding:7px 6px; font-size:0.79rem; font-weight:500; border:none; background:none; border-radius:7px; cursor:pointer; color:var(--text-muted); transition:background .12s,color .12s; }
+    .tab-btn { flex:1; padding:7px 6px; font-size:0.79rem; font-weight:500; border:none; background:none; border-radius:7px; cursor:pointer; color:var(--text-muted); transition:background .12s,color .12s; font-family:inherit; }
     .tab-btn.active { background:var(--surface); color:var(--text); border:0.5px solid var(--border); }
     .tab-btn:hover:not(.active) { color:var(--text); }
     .panel { display:none; width:100%; max-width:580px; }
     .panel.active { display:block; }
     .card { background:var(--surface); border:0.5px solid var(--border); border-radius:var(--rl); padding:1.5rem; }
-    .dropzone { border:1.5px dashed var(--border-md); border-radius:var(--r); padding:2.25rem 1.5rem; text-align:center; cursor:pointer; transition:background .15s,border-color .15s; background:var(--surface2); }
+    .dropzone { border:1.5px dashed var(--border-md); border-radius:var(--r); padding:2.25rem 1.5rem; text-align:center; cursor:pointer; transition:background .15s,border-color .15s; background:var(--surface2); user-select:none; }
     .dropzone:hover,.dropzone.over { border-color:#378add; background:var(--blue-bg); }
     .dropzone svg { width:30px; height:30px; stroke:var(--text-muted); margin:0 auto 10px; display:block; }
     .dropzone p { font-size:0.88rem; color:var(--text-muted); }
@@ -58,16 +57,16 @@
     .remove-btn { background:none; border:none; cursor:pointer; color:var(--text-faint); padding:2px; border-radius:4px; display:flex; align-items:center; transition:color .1s; }
     .remove-btn:hover { color:var(--red-text); }
     .remove-btn svg { width:14px; height:14px; stroke:currentColor; display:block; }
-    .file-row input[type=text] { width:110px; font-size:0.78rem; padding:4px 8px; border:0.5px solid var(--border-md); border-radius:6px; background:var(--surface); color:var(--text); outline:none; }
-    .file-row input[type=text]:focus { border-color:#378add; }
+    .range-input { width:110px; font-size:0.78rem; padding:4px 8px; border:0.5px solid var(--border-md); border-radius:6px; background:var(--surface); color:var(--text); outline:none; font-family:inherit; }
+    .range-input:focus { border-color:#378add; }
     .badge { font-size:0.7rem; font-weight:500; padding:2px 8px; border-radius:6px; white-space:nowrap; }
     .b-wait { background:var(--surface2); color:var(--text-muted); border:0.5px solid var(--border); }
     .b-prog { background:var(--blue-bg); color:var(--blue-text); }
     .b-done { background:var(--green-bg); color:var(--green-text); }
     .b-err  { background:var(--red-bg);  color:var(--red-text);  }
-    .dl-btn { display:flex; align-items:center; gap:4px; background:none; border:0.5px solid var(--border-md); border-radius:7px; padding:3px 9px; font-size:0.74rem; cursor:pointer; color:var(--text); text-decoration:none; white-space:nowrap; transition:background .1s; }
+    .dl-btn { display:inline-flex; align-items:center; gap:4px; background:none; border:0.5px solid var(--border-md); border-radius:7px; padding:3px 9px; font-size:0.74rem; cursor:pointer; color:var(--text); text-decoration:none; white-space:nowrap; transition:background .1s; font-family:inherit; }
     .dl-btn:hover { background:var(--surface2); }
-    .dl-btn svg { width:12px; height:12px; stroke:currentColor; }
+    .dl-btn svg { width:12px; height:12px; stroke:currentColor; flex-shrink:0; }
     .actions { display:flex; gap:9px; margin-top:1.1rem; }
     .primary-btn { flex:1; padding:10px; font-size:0.86rem; font-weight:500; border-radius:var(--r); cursor:pointer; border:0.5px solid var(--border-md); background:var(--surface); color:var(--text); transition:background .1s; font-family:inherit; }
     .primary-btn:hover:not(:disabled) { background:var(--surface2); }
@@ -79,21 +78,12 @@
     .hint { font-size:0.76rem; color:var(--text-faint); margin-top:0.9rem; line-height:1.6; background:var(--surface2); border-radius:var(--r); padding:10px 12px; }
     .hint code { font-family:monospace; background:var(--surface); padding:1px 5px; border-radius:4px; font-size:0.78rem; }
     .pg-badge { font-size:0.72rem; color:var(--text-faint); white-space:nowrap; }
-
-    /* ── Form filler ── */
+    /* Form filler */
     .form-fields { margin-top:1.1rem; display:flex; flex-direction:column; gap:12px; }
     .field-group { display:flex; flex-direction:column; gap:5px; }
     .field-label { font-size:0.8rem; color:var(--text-muted); font-weight:500; display:flex; align-items:baseline; gap:6px; }
     .field-kind { font-size:0.68rem; color:var(--text-faint); font-weight:400; background:var(--surface2); border:0.5px solid var(--border); border-radius:4px; padding:1px 5px; }
-    .field-group input[type=text],
-    .field-group input[type=date],
-    .field-group textarea,
-    .field-group select {
-      width:100%; font-size:0.84rem; padding:7px 10px;
-      border:0.5px solid var(--border-md); border-radius:var(--r);
-      background:var(--surface2); color:var(--text); outline:none;
-      font-family:inherit; transition:border-color .12s;
-    }
+    .field-group input[type=text], .field-group input[type=date], .field-group textarea, .field-group select { width:100%; font-size:0.84rem; padding:7px 10px; border:0.5px solid var(--border-md); border-radius:var(--r); background:var(--surface2); color:var(--text); outline:none; font-family:inherit; transition:border-color .12s; }
     .field-group input:focus,.field-group textarea:focus,.field-group select:focus { border-color:#378add; background:var(--surface); }
     .field-group textarea { resize:vertical; min-height:64px; }
     .checkbox-wrap { display:flex; align-items:center; gap:9px; padding:6px 10px; background:var(--surface2); border:0.5px solid var(--border-md); border-radius:var(--r); cursor:pointer; }
@@ -104,7 +94,7 @@
     .radio-row input[type=radio] { width:15px; height:15px; cursor:pointer; accent-color:#378add; flex-shrink:0; }
     .radio-row span { font-size:0.84rem; }
     .no-fields { text-align:center; padding:1.5rem 1rem; font-size:0.84rem; color:var(--text-muted); background:var(--surface2); border-radius:var(--r); border:0.5px dashed var(--border-md); }
-    .form-section-divider { height:0.5px; background:var(--border); }
+    .form-divider { height:0.5px; background:var(--border); }
     footer { margin-top:2.5rem; font-size:0.76rem; color:var(--text-faint); text-align:center; }
   </style>
 </head>
@@ -122,10 +112,10 @@
   <button class="tab-btn" onclick="switchTab('form',this)">Fill PDF Form</button>
 </div>
 
-<!-- ══ HEIC ══ -->
+<!-- HEIC -->
 <div class="panel active" id="panel-heic">
   <div class="card">
-    <div class="dropzone" id="heic-drop" onclick="document.getElementById('heic-input').click()">
+    <div class="dropzone" id="heic-drop">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
       <p>Drop .heic files here, or click to browse</p>
       <span>Multiple files supported</span>
@@ -148,10 +138,10 @@
   </div>
 </div>
 
-<!-- ══ MERGE ══ -->
+<!-- MERGE -->
 <div class="panel" id="panel-merge">
   <div class="card">
-    <div class="dropzone" id="merge-drop" onclick="document.getElementById('merge-input').click()">
+    <div class="dropzone" id="merge-drop">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
       <p>Drop PDF files here, or click to browse</p>
       <span>Drag rows below to reorder before merging</span>
@@ -165,10 +155,10 @@
   </div>
 </div>
 
-<!-- ══ SPLIT ══ -->
+<!-- SPLIT -->
 <div class="panel" id="panel-split">
   <div class="card">
-    <div class="dropzone" id="split-drop" onclick="document.getElementById('split-input').click()">
+    <div class="dropzone" id="split-drop">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
       <p>Drop a single PDF here, or click to browse</p>
       <span>Then specify page ranges for each output file</span>
@@ -191,10 +181,10 @@
   </div>
 </div>
 
-<!-- ══ FORM FILLER ══ -->
+<!-- FORM FILLER -->
 <div class="panel" id="panel-form">
   <div class="card">
-    <div class="dropzone" id="form-drop" onclick="document.getElementById('form-input').click()">
+    <div class="dropzone" id="form-drop">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
       <p>Drop a PDF with form fields here, or click to browse</p>
       <span>Detects text fields, checkboxes, dropdowns and radio buttons</span>
@@ -211,372 +201,363 @@
 <footer>All processing happens in your browser · No data leaves your device</footer>
 
 <script>
-/* ── Tab switching ── */
+/* ── Shared ── */
 function switchTab(name, btn) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
   btn.classList.add('active');
 }
-
-/* ── Shared helpers ── */
 function fmtSize(b) { return b < 1048576 ? Math.round(b/1024)+' KB' : (b/1048576).toFixed(1)+' MB'; }
-const DL_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
+const DL = `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
 async function triggerDownloads(items) {
   for (const {url,name} of items) {
     const a = document.createElement('a'); a.href=url; a.download=name; a.click();
-    await new Promise(r => setTimeout(r,160));
+    await new Promise(r => setTimeout(r, 160));
   }
 }
+function setupDropzone(dropId, inputId, onFiles) {
+  const drop = document.getElementById(dropId);
+  const inp  = document.getElementById(inputId);
+  drop.addEventListener('click', () => inp.click());
+  drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+  drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('over'); onFiles([...e.dataTransfer.files]); });
+  inp.addEventListener('change', () => { onFiles([...inp.files]); inp.value = ''; });
+}
 
-/* ══════════════════════════════════════
-   HEIC → JPG
-══════════════════════════════════════ */
+/* ══ HEIC → JPG ══ */
 (function(){
-  const drop=document.getElementById('heic-drop'), inp=document.getElementById('heic-input'),
-        list=document.getElementById('heic-list'), btn=document.getElementById('heic-btn'),
+  const list=document.getElementById('heic-list'), btn=document.getElementById('heic-btn'),
         dlAll=document.getElementById('heic-dl-all'), sum=document.getElementById('heic-summary'),
         qual=document.getElementById('heic-quality'), qout=document.getElementById('heic-qout');
   let files=[], results={};
-  qual.oninput=()=>qout.textContent=qual.value+'%';
-  drop.ondragover=e=>{e.preventDefault();drop.classList.add('over');};
-  drop.ondragleave=()=>drop.classList.remove('over');
-  drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');add([...e.dataTransfer.files]);};
-  inp.onchange=()=>{add([...inp.files]);inp.value='';};
-  function add(nf){
-    const h=nf.filter(f=>/\.heic$/i.test(f.name)||f.type==='image/heic'||f.type==='image/heif');
-    if(!h.length){sum.textContent='No .heic files found.';return;}
-    h.forEach(f=>{if(!files.find(x=>x.name===f.name&&x.size===f.size))files.push(f);});
-    results={};render();btn.disabled=false;sum.textContent='';dlAll.style.display='none';
+
+  qual.addEventListener('input', () => qout.textContent = qual.value + '%');
+
+  setupDropzone('heic-drop', 'heic-input', add);
+
+  function add(newFiles) {
+    const heics = newFiles.filter(f => /\.heic$/i.test(f.name) || f.type === 'image/heic' || f.type === 'image/heif');
+    if (!heics.length) { sum.textContent = 'No .heic files found.'; return; }
+    heics.forEach(f => { if (!files.find(x => x.name===f.name && x.size===f.size)) files.push(f); });
+    results = {}; render(); btn.disabled = false; sum.textContent = ''; dlAll.style.display = 'none';
   }
-  function render(){
-    list.innerHTML='';
-    files.forEach((f,i)=>{
-      const res=results[i];
-      let badge='<span class="badge b-wait">Waiting</span>';
-      if(res==='converting') badge='<span class="badge b-prog">Converting…</span>';
-      else if(res==='error') badge='<span class="badge b-err">Error</span>';
-      else if(res?.url) badge='<span class="badge b-done">Done</span>';
-      let dl=res?.url?`<a class="dl-btn" href="${res.url}" download="${res.name}">${DL_ICON}Save</a>`:'';
-      const row=document.createElement('div'); row.className='file-row';
-      row.innerHTML=`<span class="name" title="${f.name}">${f.name}</span><span class="sz">${fmtSize(f.size)}</span>${badge}${dl}`;
+
+  function render() {
+    list.innerHTML = '';
+    files.forEach((f, i) => {
+      const res = results[i];
+      let badge = '<span class="badge b-wait">Waiting</span>';
+      if (res === 'converting') badge = '<span class="badge b-prog">Converting…</span>';
+      else if (res === 'error') badge = '<span class="badge b-err">Error</span>';
+      else if (res && res.url)  badge = '<span class="badge b-done">Done</span>';
+      let dl = (res && res.url) ? `<a class="dl-btn" href="${res.url}" download="${res.name}">${DL} Save</a>` : '';
+      const row = document.createElement('div'); row.className = 'file-row';
+      row.innerHTML = `<span class="name" title="${f.name}">${f.name}</span><span class="sz">${fmtSize(f.size)}</span>${badge}${dl}`;
       list.appendChild(row);
     });
   }
-  btn.onclick=async()=>{
-    if(!files.length)return;
-    btn.disabled=true;dlAll.style.display='none';sum.textContent='Converting…';
-    const q=parseInt(qual.value)/100;
-    for(let i=0;i<files.length;i++){
-      if(results[i]?.url)continue;
-      results[i]='converting';render();
-      try{
-        let blob=await heic2any({blob:files[i],toType:'image/jpeg',quality:q});
-        if(Array.isArray(blob))blob=blob[0];
-        results[i]={url:URL.createObjectURL(blob),name:files[i].name.replace(/\.heic$/i,'.jpg')};
-      }catch{results[i]='error';}
+
+  btn.addEventListener('click', async () => {
+    if (!files.length) return;
+    btn.disabled = true; dlAll.style.display = 'none'; sum.textContent = 'Converting…';
+    const q = parseInt(qual.value) / 100;
+    for (let i = 0; i < files.length; i++) {
+      if (results[i] && results[i].url) continue;
+      results[i] = 'converting'; render();
+      try {
+        let blob = await heic2any({ blob: files[i], toType: 'image/jpeg', quality: q });
+        if (Array.isArray(blob)) blob = blob[0];
+        results[i] = { url: URL.createObjectURL(blob), name: files[i].name.replace(/\.heic$/i, '.jpg') };
+      } catch(e) {
+        console.error('heic2any error', e);
+        results[i] = 'error';
+      }
       render();
     }
-    const done=Object.values(results).filter(r=>r?.url).length;
-    const err=Object.values(results).filter(r=>r==='error').length;
-    sum.textContent=`${done} converted${err?`, ${err} failed`:''}. `;
-    btn.disabled=false;
-    if(done>1)dlAll.style.display='flex';
-  };
-  dlAll.onclick=()=>triggerDownloads(Object.values(results).filter(r=>r?.url));
+    const done = Object.values(results).filter(r => r && r.url).length;
+    const err  = Object.values(results).filter(r => r === 'error').length;
+    sum.textContent = `${done} converted${err ? `, ${err} failed` : ''}.`;
+    btn.disabled = false;
+    if (done > 1) dlAll.style.display = 'flex';
+  });
+
+  dlAll.addEventListener('click', () => triggerDownloads(Object.values(results).filter(r => r && r.url)));
 })();
 
-/* ══════════════════════════════════════
-   MERGE PDFs
-══════════════════════════════════════ */
+/* ══ MERGE PDFs ══ */
 (function(){
-  const drop=document.getElementById('merge-drop'), inp=document.getElementById('merge-input'),
-        list=document.getElementById('merge-list'), btn=document.getElementById('merge-btn'),
+  const list=document.getElementById('merge-list'), btn=document.getElementById('merge-btn'),
         sum=document.getElementById('merge-summary');
   let files=[], dragSrc=null;
-  drop.ondragover=e=>{e.preventDefault();drop.classList.add('over');};
-  drop.ondragleave=()=>drop.classList.remove('over');
-  drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');add([...e.dataTransfer.files]);};
-  inp.onchange=()=>{add([...inp.files]);inp.value='';};
-  function add(nf){
-    const p=nf.filter(f=>/\.pdf$/i.test(f.name)||f.type==='application/pdf');
-    if(!p.length){sum.textContent='No PDF files found.';return;}
-    p.forEach(f=>{if(!files.find(x=>x.name===f.name&&x.size===f.size))files.push(f);});
-    render();btn.disabled=files.length<2;sum.textContent='';
+
+  setupDropzone('merge-drop', 'merge-input', add);
+
+  function add(newFiles) {
+    const pdfs = newFiles.filter(f => /\.pdf$/i.test(f.name) || f.type === 'application/pdf');
+    if (!pdfs.length) { sum.textContent = 'No PDF files found.'; return; }
+    pdfs.forEach(f => { if (!files.find(x => x.name===f.name && x.size===f.size)) files.push(f); });
+    render(); btn.disabled = files.length < 2; sum.textContent = '';
   }
-  function render(){
-    list.innerHTML='';
-    files.forEach((f,i)=>{
-      const row=document.createElement('div'); row.className='file-row'; row.draggable=true; row.dataset.idx=i;
-      row.innerHTML=`<span class="drag-handle" title="Drag to reorder"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span>
-        <span class="name" title="${f.name}">${f.name}</span>
-        <span class="sz">${fmtSize(f.size)}</span>
-        <button class="remove-btn" data-i="${i}" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
-      row.ondragstart=()=>{dragSrc=i;row.style.opacity='0.4';};
-      row.ondragend=()=>{row.style.opacity='1';document.querySelectorAll('#merge-list .file-row').forEach(r=>r.classList.remove('drag-over'));};
-      row.ondragover=e=>{e.preventDefault();row.classList.add('drag-over');};
-      row.ondragleave=()=>row.classList.remove('drag-over');
-      row.ondrop=e=>{e.preventDefault();row.classList.remove('drag-over');if(dragSrc===null||dragSrc===i)return;const m=files.splice(dragSrc,1)[0];files.splice(i,0,m);dragSrc=null;render();btn.disabled=files.length<2;};
-      row.querySelector('.remove-btn').onclick=()=>{files.splice(i,1);render();btn.disabled=files.length<2;if(!files.length)sum.textContent='';};
+
+  function render() {
+    list.innerHTML = '';
+    files.forEach((f, i) => {
+      const row = document.createElement('div'); row.className = 'file-row'; row.draggable = true;
+      row.innerHTML = `<span class="drag-handle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span>
+        <span class="name" title="${f.name}">${f.name}</span><span class="sz">${fmtSize(f.size)}</span>
+        <button class="remove-btn"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+      row.addEventListener('dragstart', () => { dragSrc = i; row.style.opacity = '0.4'; });
+      row.addEventListener('dragend', () => { row.style.opacity = '1'; list.querySelectorAll('.file-row').forEach(r => r.classList.remove('drag-over')); });
+      row.addEventListener('dragover', e => { e.preventDefault(); row.classList.add('drag-over'); });
+      row.addEventListener('dragleave', () => row.classList.remove('drag-over'));
+      row.addEventListener('drop', e => {
+        e.preventDefault(); row.classList.remove('drag-over');
+        if (dragSrc === null || dragSrc === i) return;
+        const m = files.splice(dragSrc, 1)[0]; files.splice(i, 0, m); dragSrc = null; render();
+        btn.disabled = files.length < 2;
+      });
+      row.querySelector('.remove-btn').addEventListener('click', () => {
+        files.splice(i, 1); render(); btn.disabled = files.length < 2;
+      });
       list.appendChild(row);
     });
   }
-  btn.onclick=async()=>{
-    if(files.length<2)return;
-    btn.disabled=true;sum.textContent='Merging…';
-    try{
-      const merged=await PDFLib.PDFDocument.create();
-      for(const f of files){
-        const buf=await f.arrayBuffer();
-        const doc=await PDFLib.PDFDocument.load(buf);
-        const pages=await merged.copyPages(doc,doc.getPageIndices());
-        pages.forEach(p=>merged.addPage(p));
+
+  btn.addEventListener('click', async () => {
+    if (files.length < 2) return;
+    btn.disabled = true; sum.textContent = 'Merging…';
+    try {
+      const merged = await PDFLib.PDFDocument.create();
+      for (const f of files) {
+        const buf = await f.arrayBuffer();
+        const doc = await PDFLib.PDFDocument.load(buf);
+        const pages = await merged.copyPages(doc, doc.getPageIndices());
+        pages.forEach(p => merged.addPage(p));
       }
-      const bytes=await merged.save();
-      const url=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
-      const a=document.createElement('a');a.href=url;a.download='merged.pdf';a.click();
-      sum.textContent=`Merged ${files.length} files → merged.pdf`;
-    }catch(e){sum.textContent='Error merging. Files may be password-protected.';}
-    btn.disabled=files.length<2;
-  };
+      const bytes = await merged.save();
+      const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+      const a = document.createElement('a'); a.href = url; a.download = 'merged.pdf'; a.click();
+      sum.textContent = `Merged ${files.length} files → merged.pdf`;
+    } catch(e) { sum.textContent = 'Error merging. Files may be password-protected.'; }
+    btn.disabled = files.length < 2;
+  });
 })();
 
-/* ══════════════════════════════════════
-   SPLIT PDF
-══════════════════════════════════════ */
+/* ══ SPLIT PDF ══ */
 (function(){
-  const drop=document.getElementById('split-drop'), inp=document.getElementById('split-input'),
-        list=document.getElementById('split-list'), btn=document.getElementById('split-btn'),
+  const list=document.getElementById('split-list'), btn=document.getElementById('split-btn'),
         dlAll=document.getElementById('split-dl-all'), sum=document.getElementById('split-summary'),
         hint=document.getElementById('split-hint');
   let curFile=null, pageCount=0, splitResults=[], rangeInputs=[];
-  drop.ondragover=e=>{e.preventDefault();drop.classList.add('over');};
-  drop.ondragleave=()=>drop.classList.remove('over');
-  drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');loadFile(e.dataTransfer.files[0]);};
-  inp.onchange=()=>{loadFile(inp.files[0]);inp.value='';};
-  async function loadFile(f){
-    if(!f||!/\.pdf$/i.test(f.name)&&f.type!=='application/pdf'){sum.textContent='Please select a PDF.';return;}
-    curFile=f;splitResults=[];dlAll.style.display='none';sum.textContent='';
-    try{const buf=await f.arrayBuffer();const doc=await PDFLib.PDFDocument.load(buf);pageCount=doc.getPageCount();}
-    catch{sum.textContent='Could not read PDF (may be password-protected).';return;}
-    hint.style.display='block';btn.disabled=false;rangeInputs=[{id:0,value:''}];renderSplit();
+
+  setupDropzone('split-drop', 'split-input', files => loadFile(files[0]));
+
+  async function loadFile(f) {
+    if (!f || (!/\.pdf$/i.test(f.name) && f.type !== 'application/pdf')) { sum.textContent = 'Please select a PDF.'; return; }
+    curFile = f; splitResults = []; dlAll.style.display = 'none'; sum.textContent = 'Reading…';
+    try {
+      const buf = await f.arrayBuffer();
+      const doc = await PDFLib.PDFDocument.load(buf);
+      pageCount = doc.getPageCount();
+    } catch { sum.textContent = 'Could not read PDF (may be password-protected).'; return; }
+    hint.style.display = 'block'; btn.disabled = false;
+    rangeInputs = [{ value: '' }]; renderSplit(); sum.textContent = '';
   }
-  function renderSplit(){
-    list.innerHTML='';
-    if(!curFile)return;
-    const info=document.createElement('div');info.className='file-row';
-    info.innerHTML=`<span class="name">${curFile.name}</span><span class="sz">${fmtSize(curFile.size)}</span><span class="pg-badge">${pageCount} pages</span>`;
+
+  function renderSplit() {
+    list.innerHTML = '';
+    if (!curFile) return;
+    const info = document.createElement('div'); info.className = 'file-row';
+    info.innerHTML = `<span class="name">${curFile.name}</span><span class="sz">${fmtSize(curFile.size)}</span><span class="pg-badge">${pageCount} pages</span>`;
     list.appendChild(info);
-    rangeInputs.forEach((r,i)=>{
-      const row=document.createElement('div');row.className='file-row';
-      const res=splitResults[i];
-      let extra='';
-      if(res==='error')extra='<span class="badge b-err">Error</span>';
-      else if(res?.url)extra=`<span class="badge b-done">Done</span><a class="dl-btn" href="${res.url}" download="${res.name}">${DL_ICON}Save</a>`;
-      row.innerHTML=`<span style="font-size:0.78rem;color:var(--text-muted);white-space:nowrap;flex-shrink:0">Part ${i+1}</span>
-        <input type="text" placeholder="e.g. 1-3 or 4,6" value="${r.value}" style="flex:1" data-i="${i}">
+    rangeInputs.forEach((r, i) => {
+      const row = document.createElement('div'); row.className = 'file-row';
+      const res = splitResults[i];
+      let extra = '';
+      if (res === 'error') extra = '<span class="badge b-err">Error</span>';
+      else if (res && res.url) extra = `<span class="badge b-done">Done</span><a class="dl-btn" href="${res.url}" download="${res.name}">${DL} Save</a>`;
+      const vis = rangeInputs.length === 1 ? 'visibility:hidden' : '';
+      row.innerHTML = `<span style="font-size:0.78rem;color:var(--text-muted);white-space:nowrap;flex-shrink:0">Part ${i+1}</span>
+        <input class="range-input" type="text" placeholder="e.g. 1-3 or 4,6" value="${r.value}">
         ${extra}
-        <button class="remove-btn" data-i="${i}" title="Remove" ${rangeInputs.length===1?'style="visibility:hidden"':''}><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
-      row.querySelector('input').oninput=e=>rangeInputs[i].value=e.target.value;
-      const rb=row.querySelector('.remove-btn');if(rb)rb.onclick=()=>{rangeInputs.splice(i,1);splitResults=[];renderSplit();};
+        <button class="remove-btn" style="${vis}"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+      row.querySelector('input').addEventListener('input', e => rangeInputs[i].value = e.target.value);
+      row.querySelector('.remove-btn').addEventListener('click', () => { rangeInputs.splice(i, 1); splitResults = []; renderSplit(); });
       list.appendChild(row);
     });
-    const addRow=document.createElement('div');addRow.style.marginTop='4px';
-    const addBtn=document.createElement('button');addBtn.className='dl-btn';addBtn.style.cssText='font-size:0.78rem;padding:5px 12px';
-    addBtn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;stroke:currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add range`;
-    addBtn.onclick=()=>{rangeInputs.push({id:Date.now(),value:''});splitResults=[];renderSplit();};
-    addRow.appendChild(addBtn);list.appendChild(addRow);
+    const addBtn = document.createElement('button'); addBtn.className = 'dl-btn'; addBtn.style.cssText = 'font-size:0.78rem;padding:5px 12px;margin-top:4px';
+    addBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;stroke:currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add range`;
+    addBtn.addEventListener('click', () => { rangeInputs.push({ value: '' }); splitResults = []; renderSplit(); });
+    list.appendChild(addBtn);
   }
-  function parseRange(str,total){
-    if(!str.trim())return Array.from({length:total},(_,i)=>i);
-    const idx=new Set();
-    str.split(',').forEach(p=>{p=p.trim();const d=p.indexOf('-');
-      if(d>0){const a=parseInt(p.slice(0,d))-1,b=parseInt(p.slice(d+1))-1;if(!isNaN(a)&&!isNaN(b))for(let i=Math.max(0,a);i<=Math.min(total-1,b);i++)idx.add(i);}
-      else{const n=parseInt(p)-1;if(!isNaN(n)&&n>=0&&n<total)idx.add(n);}
+
+  function parseRange(str, total) {
+    if (!str.trim()) return Array.from({ length: total }, (_, i) => i);
+    const idx = new Set();
+    str.split(',').forEach(p => {
+      p = p.trim(); const d = p.indexOf('-');
+      if (d > 0) { const a = parseInt(p.slice(0,d))-1, b = parseInt(p.slice(d+1))-1; if (!isNaN(a)&&!isNaN(b)) for (let i=Math.max(0,a);i<=Math.min(total-1,b);i++) idx.add(i); }
+      else { const n = parseInt(p)-1; if (!isNaN(n)&&n>=0&&n<total) idx.add(n); }
     });
-    return[...idx].sort((a,b)=>a-b);
+    return [...idx].sort((a,b)=>a-b);
   }
-  btn.onclick=async()=>{
-    if(!curFile)return;
-    btn.disabled=true;dlAll.style.display='none';sum.textContent='Splitting…';splitResults=[];
-    const buf=await curFile.arrayBuffer();
-    const base=curFile.name.replace(/\.pdf$/i,'');
-    const allBlank=rangeInputs.every(r=>!r.value.trim());
-    const jobs=allBlank
-      ?Array.from({length:pageCount},(_,i)=>({indices:[i],name:`${base}_page${i+1}.pdf`}))
-      :rangeInputs.map((r,i)=>({indices:parseRange(r.value,pageCount),name:`${base}_part${i+1}.pdf`}));
-    for(let j=0;j<jobs.length;j++){
-      try{
-        const src=await PDFLib.PDFDocument.load(buf);
-        const nd=await PDFLib.PDFDocument.create();
-        if(!jobs[j].indices.length)throw new Error('empty');
-        const cp=await nd.copyPages(src,jobs[j].indices);
-        cp.forEach(p=>nd.addPage(p));
-        const bytes=await nd.save();
-        splitResults[j]={url:URL.createObjectURL(new Blob([bytes],{type:'application/pdf'})),name:jobs[j].name};
-      }catch{splitResults[j]='error';}
+
+  btn.addEventListener('click', async () => {
+    if (!curFile) return;
+    btn.disabled = true; dlAll.style.display = 'none'; sum.textContent = 'Splitting…'; splitResults = [];
+    const buf = await curFile.arrayBuffer();
+    const base = curFile.name.replace(/\.pdf$/i, '');
+    const allBlank = rangeInputs.every(r => !r.value.trim());
+    const jobs = allBlank
+      ? Array.from({ length: pageCount }, (_, i) => ({ indices:[i], name:`${base}_page${i+1}.pdf` }))
+      : rangeInputs.map((r, i) => ({ indices: parseRange(r.value, pageCount), name:`${base}_part${i+1}.pdf` }));
+    for (let j = 0; j < jobs.length; j++) {
+      try {
+        const src = await PDFLib.PDFDocument.load(buf);
+        const nd = await PDFLib.PDFDocument.create();
+        if (!jobs[j].indices.length) throw new Error('empty');
+        const cp = await nd.copyPages(src, jobs[j].indices);
+        cp.forEach(p => nd.addPage(p));
+        const bytes = await nd.save();
+        splitResults[j] = { url: URL.createObjectURL(new Blob([bytes],{type:'application/pdf'})), name: jobs[j].name };
+      } catch { splitResults[j] = 'error'; }
       renderSplit();
     }
-    const done=splitResults.filter(r=>r?.url).length;
-    const err=splitResults.filter(r=>r==='error').length;
-    sum.textContent=`${done} file${done!==1?'s':''} created${err?`, ${err} failed`:''}. `;
-    btn.disabled=false;
-    if(done>1)dlAll.style.display='flex';
-  };
-  dlAll.onclick=()=>triggerDownloads(splitResults.filter(r=>r?.url));
+    const done = splitResults.filter(r => r && r.url).length;
+    const err  = splitResults.filter(r => r === 'error').length;
+    sum.textContent = `${done} file${done!==1?'s':''} created${err?`, ${err} failed`:''}.`;
+    btn.disabled = false;
+    if (done > 1) dlAll.style.display = 'flex';
+  });
+
+  dlAll.addEventListener('click', () => triggerDownloads(splitResults.filter(r => r && r.url)));
 })();
 
-/* ══════════════════════════════════════
-   PDF FORM FILLER
-══════════════════════════════════════ */
+/* ══ PDF FORM FILLER ══ */
 (function(){
-  const drop=document.getElementById('form-drop'), inp=document.getElementById('form-input'),
-        area=document.getElementById('form-fields-area'), btn=document.getElementById('form-btn'),
+  const area=document.getElementById('form-fields-area'), btn=document.getElementById('form-btn'),
         actions=document.getElementById('form-actions'), sum=document.getElementById('form-summary');
-
   let curFile=null, fieldDefs=[];
 
-  // pdfjsLib for field discovery (richer than pdf-lib alone)
-  if(typeof pdfjsLib !== 'undefined') pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+  setupDropzone('form-drop', 'form-input', files => loadForm(files[0]));
 
-  drop.ondragover=e=>{e.preventDefault();drop.classList.add('over');};
-  drop.ondragleave=()=>drop.classList.remove('over');
-  drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');loadForm(e.dataTransfer.files[0]);};
-  inp.onchange=()=>{loadForm(inp.files[0]);inp.value='';};
-
-  async function loadForm(f){
-    if(!f||!/\.pdf$/i.test(f.name)&&f.type!=='application/pdf'){sum.textContent='Please select a PDF.';return;}
-    curFile=f; fieldDefs=[]; area.innerHTML=''; actions.style.display='none'; sum.textContent='Reading fields…';
-    try{
-      const buf=await f.arrayBuffer();
-      const pdfDoc=await PDFLib.PDFDocument.load(new Uint8Array(buf));
-      const form=pdfDoc.getForm();
-      const rawFields=form.getFields();
-
-      if(!rawFields.length){
-        area.innerHTML='<div class="no-fields">No fillable form fields found in this PDF.<br><span style="font-size:0.78rem;color:var(--text-faint)">This PDF may not have interactive form fields.</span></div>';
-        sum.textContent='';return;
+  async function loadForm(f) {
+    if (!f || (!/\.pdf$/i.test(f.name) && f.type !== 'application/pdf')) { sum.textContent = 'Please select a PDF.'; return; }
+    curFile = f; fieldDefs = []; area.innerHTML = ''; actions.style.display = 'none'; sum.textContent = 'Reading fields…';
+    try {
+      const buf = await f.arrayBuffer();
+      const pdfDoc = await PDFLib.PDFDocument.load(new Uint8Array(buf));
+      const form = pdfDoc.getForm();
+      const rawFields = form.getFields();
+      if (!rawFields.length) {
+        area.innerHTML = '<div class="no-fields">No fillable form fields found in this PDF.<br><span style="font-size:0.78rem;color:var(--text-faint)">This PDF may not have interactive AcroForm fields.</span></div>';
+        sum.textContent = ''; return;
       }
-
-      fieldDefs=rawFields.map(field=>{
-        const name=field.getName();
-        const type=field.constructor.name; // PDFTextField, PDFCheckBox, PDFDropdown, PDFRadioGroup, PDFOptionList
-        let options=[];
-        if(type==='PDFDropdown'||type==='PDFOptionList'){
-          try{options=field.getOptions();}catch{}
-        }
-        if(type==='PDFRadioGroup'){
-          try{options=field.getOptions();}catch{}
-        }
-        let currentVal='';
-        try{
-          if(type==='PDFTextField')currentVal=field.getText()||'';
-          else if(type==='PDFCheckBox')currentVal=field.isChecked()?'yes':'no';
-          else if(type==='PDFDropdown'||type==='PDFOptionList'){const s=field.getSelected();currentVal=Array.isArray(s)?s[0]||'':s||'';}
-          else if(type==='PDFRadioGroup'){currentVal=field.getSelected()||'';}
-        }catch{}
-        return{name,type,options,currentVal};
+      fieldDefs = rawFields.map(field => {
+        const name = field.getName();
+        const type = field.constructor.name;
+        let options = [];
+        try { if (type==='PDFDropdown'||type==='PDFOptionList'||type==='PDFRadioGroup') options = field.getOptions(); } catch {}
+        let currentVal = '';
+        try {
+          if (type==='PDFTextField') currentVal = field.getText() || '';
+          else if (type==='PDFCheckBox') currentVal = field.isChecked() ? 'yes' : 'no';
+          else if (type==='PDFDropdown'||type==='PDFOptionList') { const s = field.getSelected(); currentVal = Array.isArray(s) ? s[0]||'' : s||''; }
+          else if (type==='PDFRadioGroup') currentVal = field.getSelected() || '';
+        } catch {}
+        return { name, type, options, currentVal };
       });
-
       renderFields();
-      actions.style.display='flex';
-      sum.textContent=`Found ${fieldDefs.length} field${fieldDefs.length!==1?'s':''}.`;
-    }catch(e){
-      sum.textContent='Could not read form fields. The PDF may be password-protected.';
+      actions.style.display = 'flex';
+      sum.textContent = `Found ${fieldDefs.length} field${fieldDefs.length!==1?'s':''}.`;
+    } catch(e) {
+      sum.textContent = 'Could not read form fields. The PDF may be password-protected.';
     }
   }
 
-  function friendlyType(t){
-    const m={PDFTextField:'Text',PDFCheckBox:'Checkbox',PDFDropdown:'Dropdown',PDFRadioGroup:'Radio',PDFOptionList:'List'};
-    return m[t]||t;
+  function friendlyType(t) {
+    return { PDFTextField:'Text', PDFCheckBox:'Checkbox', PDFDropdown:'Dropdown', PDFRadioGroup:'Radio', PDFOptionList:'List' }[t] || t;
   }
+  function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  function renderFields(){
-    area.innerHTML='';
-    if(!fieldDefs.length)return;
-    const wrap=document.createElement('div');wrap.className='form-fields';
-
-    fieldDefs.forEach((fd,i)=>{
-      if(i>0){const div=document.createElement('div');div.className='form-section-divider';wrap.appendChild(div);}
-      const group=document.createElement('div');group.className='field-group';
-
-      const label=document.createElement('div');label.className='field-label';
-      label.innerHTML=`${escHtml(fd.name)} <span class="field-kind">${friendlyType(fd.type)}</span>`;
-      group.appendChild(label);
-
-      if(fd.type==='PDFTextField'){
-        const isMulti=fd.name.toLowerCase().includes('address')||fd.name.toLowerCase().includes('note')||fd.name.toLowerCase().includes('comment')||fd.name.toLowerCase().includes('description');
-        if(isMulti){
-          const ta=document.createElement('textarea');ta.dataset.i=i;ta.value=fd.currentVal;ta.placeholder=fd.name;
-          ta.oninput=()=>fieldDefs[i].currentVal=ta.value;group.appendChild(ta);
-        }else{
-          const ti=document.createElement('input');ti.type='text';ti.dataset.i=i;ti.value=fd.currentVal;ti.placeholder=fd.name;
-          ti.oninput=()=>fieldDefs[i].currentVal=ti.value;group.appendChild(ti);
-        }
-      }else if(fd.type==='PDFCheckBox'){
-        const lbl=document.createElement('label');lbl.className='checkbox-wrap';
-        const cb=document.createElement('input');cb.type='checkbox';cb.checked=fd.currentVal==='yes';
-        cb.onchange=()=>fieldDefs[i].currentVal=cb.checked?'yes':'no';
-        const sp=document.createElement('span');sp.textContent='Check this box';
-        lbl.appendChild(cb);lbl.appendChild(sp);group.appendChild(lbl);
-      }else if(fd.type==='PDFDropdown'||fd.type==='PDFOptionList'){
-        const sel=document.createElement('select');sel.dataset.i=i;
-        const blank=document.createElement('option');blank.value='';blank.textContent='— select —';sel.appendChild(blank);
-        fd.options.forEach(o=>{const opt=document.createElement('option');opt.value=o;opt.textContent=o;if(o===fd.currentVal)opt.selected=true;sel.appendChild(opt);});
-        sel.onchange=()=>fieldDefs[i].currentVal=sel.value;group.appendChild(sel);
-      }else if(fd.type==='PDFRadioGroup'){
-        const rg=document.createElement('div');rg.className='radio-group';
-        fd.options.forEach(o=>{
-          const lbl=document.createElement('label');lbl.className='radio-row';
-          const rb=document.createElement('input');rb.type='radio';rb.name='radio_'+i;rb.value=o;rb.checked=o===fd.currentVal;
-          rb.onchange=()=>fieldDefs[i].currentVal=o;
-          const sp=document.createElement('span');sp.textContent=o;
-          lbl.appendChild(rb);lbl.appendChild(sp);rg.appendChild(lbl);
+  function renderFields() {
+    area.innerHTML = '';
+    const wrap = document.createElement('div'); wrap.className = 'form-fields';
+    fieldDefs.forEach((fd, i) => {
+      if (i > 0) { const div = document.createElement('div'); div.className = 'form-divider'; wrap.appendChild(div); }
+      const group = document.createElement('div'); group.className = 'field-group';
+      const lbl = document.createElement('div'); lbl.className = 'field-label';
+      lbl.innerHTML = `${esc(fd.name)} <span class="field-kind">${friendlyType(fd.type)}</span>`;
+      group.appendChild(lbl);
+      if (fd.type === 'PDFTextField') {
+        const isMulti = /address|note|comment|description/i.test(fd.name);
+        const el = document.createElement(isMulti ? 'textarea' : 'input');
+        if (!isMulti) el.type = 'text';
+        el.value = fd.currentVal; el.placeholder = fd.name;
+        el.addEventListener('input', e => fieldDefs[i].currentVal = e.target.value);
+        group.appendChild(el);
+      } else if (fd.type === 'PDFCheckBox') {
+        const label = document.createElement('label'); label.className = 'checkbox-wrap';
+        const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = fd.currentVal === 'yes';
+        cb.addEventListener('change', () => fieldDefs[i].currentVal = cb.checked ? 'yes' : 'no');
+        const sp = document.createElement('span'); sp.textContent = fd.name;
+        label.appendChild(cb); label.appendChild(sp); group.appendChild(label);
+      } else if (fd.type === 'PDFDropdown' || fd.type === 'PDFOptionList') {
+        const sel = document.createElement('select');
+        const blank = document.createElement('option'); blank.value = ''; blank.textContent = '— select —'; sel.appendChild(blank);
+        fd.options.forEach(o => { const opt = document.createElement('option'); opt.value = o; opt.textContent = o; if (o === fd.currentVal) opt.selected = true; sel.appendChild(opt); });
+        sel.addEventListener('change', () => fieldDefs[i].currentVal = sel.value);
+        group.appendChild(sel);
+      } else if (fd.type === 'PDFRadioGroup') {
+        const rg = document.createElement('div'); rg.className = 'radio-group';
+        fd.options.forEach(o => {
+          const label = document.createElement('label'); label.className = 'radio-row';
+          const rb = document.createElement('input'); rb.type = 'radio'; rb.name = 'radio_field_' + i; rb.value = o; rb.checked = o === fd.currentVal;
+          rb.addEventListener('change', () => fieldDefs[i].currentVal = o);
+          const sp = document.createElement('span'); sp.textContent = o;
+          label.appendChild(rb); label.appendChild(sp); rg.appendChild(label);
         });
         group.appendChild(rg);
-      }else{
-        const ti=document.createElement('input');ti.type='text';ti.dataset.i=i;ti.value=fd.currentVal;ti.placeholder='Value';
-        ti.oninput=()=>fieldDefs[i].currentVal=ti.value;group.appendChild(ti);
+      } else {
+        const el = document.createElement('input'); el.type = 'text'; el.value = fd.currentVal; el.placeholder = fd.name;
+        el.addEventListener('input', e => fieldDefs[i].currentVal = e.target.value);
+        group.appendChild(el);
       }
-
       wrap.appendChild(group);
     });
     area.appendChild(wrap);
   }
 
-  function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-  btn.onclick=async()=>{
-    if(!curFile||!fieldDefs.length)return;
-    btn.disabled=true;sum.textContent='Saving…';
-    try{
-      const buf=await curFile.arrayBuffer();
-      const pdfDoc=await PDFLib.PDFDocument.load(new Uint8Array(buf));
-      const form=pdfDoc.getForm();
-
-      fieldDefs.forEach(fd=>{
-        try{
-          const field=form.getField(fd.name);
-          const type=fd.type;
-          if(type==='PDFTextField')field.setText(fd.currentVal||'');
-          else if(type==='PDFCheckBox'){fd.currentVal==='yes'?field.check():field.uncheck();}
-          else if(type==='PDFDropdown'||type==='PDFOptionList'){if(fd.currentVal)field.select(fd.currentVal);}
-          else if(type==='PDFRadioGroup'){if(fd.currentVal)field.select(fd.currentVal);}
-        }catch(e){console.warn('Could not set field',fd.name,e);}
+  btn.addEventListener('click', async () => {
+    if (!curFile || !fieldDefs.length) return;
+    btn.disabled = true; sum.textContent = 'Saving…';
+    try {
+      const buf = await curFile.arrayBuffer();
+      const pdfDoc = await PDFLib.PDFDocument.load(new Uint8Array(buf));
+      const form = pdfDoc.getForm();
+      fieldDefs.forEach(fd => {
+        try {
+          const field = form.getField(fd.name);
+          if (fd.type === 'PDFTextField') field.setText(fd.currentVal || '');
+          else if (fd.type === 'PDFCheckBox') fd.currentVal === 'yes' ? field.check() : field.uncheck();
+          else if (fd.type === 'PDFDropdown' || fd.type === 'PDFOptionList') { if (fd.currentVal) field.select(fd.currentVal); }
+          else if (fd.type === 'PDFRadioGroup') { if (fd.currentVal) field.select(fd.currentVal); }
+        } catch(e) { console.warn('Could not set field', fd.name, e); }
       });
-
-      form.flatten(); // bake fields into page content
-      const bytes=await pdfDoc.save();
-      const name=curFile.name.replace(/\.pdf$/i,'_filled.pdf');
-      const url=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
-      const a=document.createElement('a');a.href=url;a.download=name;a.click();
-      sum.textContent=`Saved as ${name}`;
-    }catch(e){
-      sum.textContent='Error saving PDF. It may be encrypted or read-only.';
+      form.flatten();
+      const bytes = await pdfDoc.save();
+      const name = curFile.name.replace(/\.pdf$/i, '_filled.pdf');
+      const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+      const a = document.createElement('a'); a.href = url; a.download = name; a.click();
+      sum.textContent = `Saved as ${name}`;
+    } catch(e) {
+      sum.textContent = 'Error saving PDF. It may be encrypted or read-only.';
       console.error(e);
     }
-    btn.disabled=false;
-  };
+    btn.disabled = false;
+  });
 })();
 </script>
 </body>
