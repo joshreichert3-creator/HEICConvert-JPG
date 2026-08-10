@@ -367,9 +367,8 @@ function startPdfEditor(){
         var pageNum=i+1,globalIdx=startIdx+i;
         pdfJsDoc.getPage(pageNum).then(function(page){
           var vp=page.getViewport({scale:1});
-          // Render at full card width — use devicePixelRatio for sharpness
           var dpr=window.devicePixelRatio||1;
-          var cssWidth=stack.clientWidth-80; // account for left sidebar
+          var cssWidth=stack.clientWidth-80;
           if(cssWidth<300)cssWidth=300;
           var scale=(cssWidth*dpr)/vp.width;
           var viewport=page.getViewport({scale:scale});
@@ -381,7 +380,7 @@ function startPdfEditor(){
           page.render({canvasContext:canvas.getContext('2d'),viewport:viewport}).promise.then(function(){
             if(pages[globalIdx]){
               pages[globalIdx].canvas=canvas;
-              // Swap spinner for real canvas in the DOM
+              // Place the real canvas directly — never clone it
               var row=stack.children[globalIdx];
               if(row){
                 var wrap=row.querySelector('.page-canvas-wrap');
@@ -397,6 +396,7 @@ function startPdfEditor(){
     }).catch(function(e){console.error('pdf.js error',e);});
   }
 
+  /* Build the full DOM stack — only called when pages array changes */
   function renderStack(){
     stack.innerHTML='';
     pcountEl.textContent=pages.length+' page'+(pages.length!==1?'s':'');
@@ -405,15 +405,14 @@ function startPdfEditor(){
       row.className='page-row'+(i===sel?' selected':'');
       row.draggable=true;
 
-      // Left sidebar
       var left=document.createElement('div');left.className='page-row-left';
       left.innerHTML='<span class="drag-handle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span>'
         +'<span class="page-num-badge">'+(i+1)+'</span>';
 
-      // Canvas area
       var wrap=document.createElement('div');wrap.className='page-canvas-wrap';
       if(pg.canvas){
-        wrap.appendChild(pg.canvas.cloneNode(true));
+        // Attach the real canvas element directly — no cloning
+        wrap.appendChild(pg.canvas);
       } else {
         wrap.innerHTML='<div class="page-spinner"><div class="spinner-ring"></div><span>Rendering…</span></div>';
       }
@@ -421,19 +420,34 @@ function startPdfEditor(){
       row.appendChild(left);
       row.appendChild(wrap);
 
-      row.addEventListener('click',function(){sel=i;renderStack();updateBtns();});
+      // Click = update selection only, no DOM rebuild
+      row.addEventListener('click',function(){
+        setSelection(i);
+      });
+
       row.addEventListener('dragstart',function(e){dragSrc=i;row.classList.add('dragging');e.dataTransfer.effectAllowed='move';});
-      row.addEventListener('dragend',  function(){row.classList.remove('dragging');renderStack();});
+      row.addEventListener('dragend',  function(){row.classList.remove('dragging');});
       row.addEventListener('dragover', function(e){e.preventDefault();row.classList.add('drag-over');});
       row.addEventListener('dragleave',function(){row.classList.remove('drag-over');});
       row.addEventListener('drop',function(e){
         e.preventDefault();row.classList.remove('drag-over');
         if(dragSrc===null||dragSrc===i)return;
         var moved=pages.splice(dragSrc,1)[0];pages.splice(i,0,moved);
-        sel=i;dragSrc=null;renderStack();updateBtns();
+        sel=i;dragSrc=null;
+        renderStack(); // pages changed — full rebuild needed
+        updateBtns();
       });
 
       stack.appendChild(row);
+    });
+    updateBtns();
+  }
+
+  /* Just toggle CSS classes — never touches canvas elements */
+  function setSelection(i){
+    sel=i;
+    Array.from(stack.children).forEach(function(row,idx){
+      row.classList.toggle('selected', idx===i);
     });
     updateBtns();
   }
@@ -447,11 +461,13 @@ function startPdfEditor(){
 
   btnUp.addEventListener('click',function(){
     if(sel<=0)return;
-    var t=pages[sel];pages[sel]=pages[sel-1];pages[sel-1]=t;sel--;renderStack();
+    var t=pages[sel];pages[sel]=pages[sel-1];pages[sel-1]=t;sel--;
+    renderStack();
   });
   btnDown.addEventListener('click',function(){
     if(sel>=pages.length-1)return;
-    var t=pages[sel];pages[sel]=pages[sel+1];pages[sel+1]=t;sel++;renderStack();
+    var t=pages[sel];pages[sel]=pages[sel+1];pages[sel+1]=t;sel++;
+    renderStack();
   });
   btnDel.addEventListener('click',function(){
     if(pages.length<=1||sel<0)return;
