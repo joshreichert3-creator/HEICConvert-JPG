@@ -6,7 +6,6 @@
   <title>File Tools</title>
   <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/build/pdf.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -35,12 +34,10 @@
     header { text-align: center; margin-bottom: 1.75rem; }
     header h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -0.02em; }
     header p { margin-top: 0.35rem; font-size: 0.85rem; color: var(--text-muted); }
-
-    /* Tabs */
     .tabs {
       display: flex; gap: 4px; background: var(--surface2);
       border: 0.5px solid var(--border); border-radius: var(--radius);
-      padding: 4px; margin-bottom: 1.5rem; width: 100%; max-width: 640px;
+      padding: 4px; margin-bottom: 1.5rem; width: 100%; max-width: 600px;
     }
     .tab-btn {
       flex: 1; padding: 8px 6px; font-size: 0.82rem; font-weight: 500;
@@ -49,12 +46,9 @@
     }
     .tab-btn.active { background: var(--surface); color: var(--text); border: 0.5px solid var(--border); }
     .tab-btn:hover:not(.active) { color: var(--text); }
-
-    .panel { display: none; width: 100%; max-width: 640px; }
+    .panel { display: none; width: 100%; max-width: 600px; }
     .panel.active { display: block; }
     .card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; }
-
-    /* Dropzone */
     .dropzone {
       border: 1.5px dashed var(--border-md); border-radius: var(--radius);
       padding: 2.25rem 1.5rem; text-align: center; cursor: pointer;
@@ -65,15 +59,11 @@
     .dropzone p { font-size: 0.88rem; color: var(--text-muted); }
     .dropzone span { font-size: 0.76rem; color: var(--text-faint); margin-top: 4px; display: block; }
     input[type=file] { display: none; }
-
-    /* Quality */
     .quality-row { display: flex; align-items: center; gap: 12px; margin-top: 1.1rem; }
     .quality-row label { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; }
     .quality-row input[type=range] { flex: 1; -webkit-appearance: none; height: 4px; border-radius: 2px; background: var(--border-md); outline: none; cursor: pointer; }
     .quality-row input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 15px; height: 15px; border-radius: 50%; background: var(--text); cursor: pointer; }
     .qout { font-size: 0.8rem; font-weight: 500; min-width: 34px; text-align: right; }
-
-    /* File list (HEIC) */
     .file-list { margin-top: 1.1rem; display: flex; flex-direction: column; gap: 6px; }
     .file-row { background: var(--surface2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 8px 12px; display: flex; align-items: center; gap: 9px; }
     .file-row .name { flex: 1; font-size: 0.83rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -86,7 +76,6 @@
     .dl-btn { display: inline-flex; align-items: center; gap: 4px; background: none; border: 0.5px solid var(--border-md); border-radius: 7px; padding: 3px 9px; font-size: 0.74rem; cursor: pointer; color: var(--text); text-decoration: none; white-space: nowrap; transition: background .1s; font-family: inherit; }
     .dl-btn:hover { background: var(--surface2); }
     .dl-btn svg { width: 12px; height: 12px; stroke: currentColor; }
-
     .actions { display: flex; gap: 9px; margin-top: 1.1rem; }
     .primary-btn { flex: 1; padding: 10px; font-size: 0.86rem; font-weight: 500; border-radius: var(--radius); cursor: pointer; border: 0.5px solid var(--border-md); background: var(--surface); color: var(--text); transition: background .1s; font-family: inherit; }
     .primary-btn:hover:not(:disabled) { background: var(--surface2); }
@@ -96,46 +85,37 @@
     .dl-all-btn svg { width: 14px; height: 14px; stroke: currentColor; }
     .summary { font-size: 0.78rem; color: var(--text-muted); margin-top: 9px; min-height: 16px; text-align: center; }
 
-    /* PDF Page Editor */
-    .pdf-info { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 8px; }
-    .pdf-info .fname { font-size: 0.85rem; font-weight: 500; }
-    .pdf-info .pgcount { font-size: 0.78rem; color: var(--text-muted); }
-    .pdf-toolbar { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
-    .tool-btn {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 6px 12px; font-size: 0.8rem; font-weight: 500;
-      border-radius: var(--radius); cursor: pointer;
-      border: 0.5px solid var(--border-md); background: var(--surface);
-      color: var(--text); transition: background .1s; font-family: inherit;
-    }
+    /* PDF editor */
+    .pdf-meta { display: flex; align-items: center; justify-content: space-between; margin: 1rem 0 0.75rem; flex-wrap: wrap; gap: 6px; }
+    .pdf-meta .pdf-name { font-size: 0.85rem; font-weight: 500; }
+    .pdf-meta .pdf-count { font-size: 0.78rem; color: var(--text-muted); }
+    .pdf-toolbar { display: flex; gap: 7px; margin-bottom: 1rem; flex-wrap: wrap; }
+    .tool-btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 11px; font-size: 0.79rem; font-weight: 500; border-radius: var(--radius); cursor: pointer; border: 0.5px solid var(--border-md); background: var(--surface); color: var(--text); transition: background .1s; font-family: inherit; white-space: nowrap; }
     .tool-btn:hover:not(:disabled) { background: var(--surface2); }
     .tool-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-    .tool-btn svg { width: 14px; height: 14px; stroke: currentColor; flex-shrink: 0; }
-    .tool-btn.danger { border-color: var(--red-text); color: var(--red-text); }
-    .tool-btn.danger:hover:not(:disabled) { background: var(--red-bg); }
+    .tool-btn svg { width: 13px; height: 13px; stroke: currentColor; flex-shrink: 0; }
+    .tool-btn.red { border-color: var(--red-text); color: var(--red-text); }
+    .tool-btn.red:hover:not(:disabled) { background: var(--red-bg); }
 
-    /* Page grid */
-    .page-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
-    .page-card {
+    /* Page list */
+    .page-list { display: flex; flex-direction: column; gap: 5px; }
+    .page-item {
+      display: flex; align-items: center; gap: 10px;
       background: var(--surface2); border: 2px solid transparent;
-      border-radius: var(--radius); padding: 8px; cursor: pointer;
-      transition: border-color .12s, background .12s; position: relative;
-      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      border-radius: var(--radius); padding: 10px 12px; cursor: pointer;
+      transition: border-color .12s; user-select: none;
     }
-    .page-card:hover { border-color: var(--border-md); }
-    .page-card.selected { border-color: #378add; background: var(--blue-bg); }
-    .page-card canvas { width: 100%; height: auto; border-radius: 4px; display: block; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
-    .page-card .page-num { font-size: 0.72rem; color: var(--text-muted); }
-    .page-card .drag-hint { font-size: 0.65rem; color: var(--text-faint); }
-
-    /* Drag state */
-    .page-card.dragging { opacity: 0.4; }
-    .page-card.drop-before { border-left: 3px solid #378add; }
-    .page-card.drop-after  { border-right: 3px solid #378add; }
-
-    .pdf-empty { text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.85rem; }
-    .add-pdf-row { margin-top: 1rem; display: flex; align-items: center; gap: 8px; }
-    .add-pdf-row input[type=file] { display: none; }
+    .page-item:hover { border-color: var(--border-md); }
+    .page-item.selected { border-color: #378add; background: var(--blue-bg); }
+    .page-item.dragging { opacity: 0.4; }
+    .page-item.drag-over { border-color: #378add; border-style: dashed; }
+    .page-icon { flex-shrink: 0; width: 32px; height: 40px; background: white; border: 0.5px solid var(--border-md); border-radius: 3px; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .page-icon svg { width: 16px; height: 16px; stroke: var(--text-faint); }
+    .page-label { flex: 1; font-size: 0.84rem; }
+    .page-label .pg-num { font-weight: 500; }
+    .page-label .pg-src { font-size: 0.72rem; color: var(--text-faint); margin-top: 1px; }
+    .drag-handle { cursor: grab; color: var(--text-faint); }
+    .drag-handle svg { width: 14px; height: 14px; stroke: currentColor; display: block; }
 
     footer { margin-top: 2.5rem; font-size: 0.76rem; color: var(--text-faint); text-align: center; }
   </style>
@@ -148,11 +128,11 @@
 </header>
 
 <div class="tabs">
-  <button class="tab-btn active" onclick="switchTab('heic', this)">HEIC → JPG</button>
-  <button class="tab-btn" onclick="switchTab('pdf', this)">PDF Page Editor</button>
+  <button class="tab-btn active" onclick="switchTab('heic',this)">HEIC → JPG</button>
+  <button class="tab-btn" onclick="switchTab('pdf',this)">PDF Page Editor</button>
 </div>
 
-<!-- ══ HEIC ══ -->
+<!-- HEIC -->
 <div class="panel active" id="panel-heic">
   <div class="card">
     <div class="dropzone" id="heic-drop">
@@ -178,43 +158,43 @@
   </div>
 </div>
 
-<!-- ══ PDF PAGE EDITOR ══ -->
+<!-- PDF PAGE EDITOR -->
 <div class="panel" id="panel-pdf">
   <div class="card">
     <div class="dropzone" id="pdf-drop">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
       <p>Drop a PDF here, or click to browse</p>
-      <span>Then reorder, delete, or add pages</span>
+      <span>Reorder, delete, or add pages — then save</span>
     </div>
     <input type="file" id="pdf-input" accept=".pdf,application/pdf">
 
-    <div id="pdf-editor" style="display:none; margin-top:1.25rem;">
-      <div class="pdf-info">
-        <span class="fname" id="pdf-fname"></span>
-        <span class="pgcount" id="pdf-pgcount"></span>
+    <div id="pdf-editor" style="display:none">
+      <div class="pdf-meta">
+        <span class="pdf-name" id="pdf-fname"></span>
+        <span class="pdf-count" id="pdf-pcount"></span>
       </div>
       <div class="pdf-toolbar">
-        <button class="tool-btn" id="pdf-move-up" disabled title="Move selected page left">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-          Move left
+        <button class="tool-btn" id="btn-up" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+          Move up
         </button>
-        <button class="tool-btn" id="pdf-move-down" disabled title="Move selected page right">
-          Move right
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        <button class="tool-btn" id="btn-down" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          Move down
         </button>
-        <button class="tool-btn danger" id="pdf-delete" disabled>
+        <button class="tool-btn red" id="btn-del" disabled>
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-          Delete page
+          Delete
         </button>
-        <label class="tool-btn" id="pdf-add-label">
+        <label class="tool-btn" style="cursor:pointer">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Add PDF
-          <input type="file" id="pdf-add-input" accept=".pdf,application/pdf" style="display:none">
+          <input type="file" id="pdf-add" accept=".pdf,application/pdf">
         </label>
       </div>
-      <div class="page-grid" id="page-grid"></div>
-      <div class="actions" style="margin-top:1.25rem;">
-        <button class="primary-btn" id="pdf-save">Save PDF</button>
+      <div class="page-list" id="page-list"></div>
+      <div class="actions">
+        <button class="primary-btn" id="btn-save">Save PDF</button>
       </div>
       <div class="summary" id="pdf-summary"></div>
     </div>
@@ -224,7 +204,6 @@
 <footer>All processing happens in your browser · No data leaves your device</footer>
 
 <script>
-/* ── Globals ── */
 var DL = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
 
 function switchTab(name, btn) {
@@ -243,283 +222,196 @@ function setupDrop(dropId, inputId, onFiles) {
   drop.addEventListener('dragover', function(e) { e.preventDefault(); drop.classList.add('over'); });
   drop.addEventListener('dragleave', function() { drop.classList.remove('over'); });
   drop.addEventListener('drop', function(e) { e.preventDefault(); drop.classList.remove('over'); onFiles(Array.from(e.dataTransfer.files)); });
-  inp.addEventListener('change', function() { onFiles(Array.from(inp.files)); inp.value = ''; });
+  inp.addEventListener('change', function() { onFiles(Array.from(inp.files)); inp.value=''; });
 }
 
-/* ══════════════════════════════
-   HEIC → JPG
-══════════════════════════════ */
+/* ══ HEIC ══ */
 (function() {
-  var list  = document.getElementById('heic-list');
-  var btn   = document.getElementById('heic-btn');
-  var dlAll = document.getElementById('heic-dl-all');
-  var sum   = document.getElementById('heic-summary');
-  var qual  = document.getElementById('heic-quality');
-  var qout  = document.getElementById('heic-qout');
-  var files = [], results = {};
-
-  qual.oninput = function() { qout.textContent = qual.value + '%'; };
-  setupDrop('heic-drop', 'heic-input', add);
-
-  function add(newFiles) {
-    var heics = newFiles.filter(function(f) { return /\.heic$/i.test(f.name) || f.type === 'image/heic' || f.type === 'image/heif'; });
-    if (!heics.length) { sum.textContent = 'No .heic files found.'; return; }
-    heics.forEach(function(f) { if (!files.find(function(x) { return x.name===f.name && x.size===f.size; })) files.push(f); });
-    results = {}; render(); btn.disabled = false; sum.textContent = ''; dlAll.style.display = 'none';
+  var list=document.getElementById('heic-list'), btn=document.getElementById('heic-btn'),
+      dlAll=document.getElementById('heic-dl-all'), sum=document.getElementById('heic-summary'),
+      qual=document.getElementById('heic-quality'), qout=document.getElementById('heic-qout');
+  var files=[], results={};
+  qual.oninput = function() { qout.textContent = qual.value+'%'; };
+  setupDrop('heic-drop','heic-input', add);
+  function add(nf) {
+    var h=nf.filter(function(f){return /\.heic$/i.test(f.name)||f.type==='image/heic'||f.type==='image/heif';});
+    if(!h.length){sum.textContent='No .heic files found.';return;}
+    h.forEach(function(f){if(!files.find(function(x){return x.name===f.name&&x.size===f.size;}))files.push(f);});
+    results={}; render(); btn.disabled=false; sum.textContent=''; dlAll.style.display='none';
   }
-
   function render() {
-    list.innerHTML = '';
-    files.forEach(function(f, i) {
-      var res = results[i];
-      var badge = '<span class="badge b-wait">Waiting</span>';
-      if (res === 'converting') badge = '<span class="badge b-prog">Converting…</span>';
-      else if (res === 'error')  badge = '<span class="badge b-err">Error</span>';
-      else if (res && res.url)   badge = '<span class="badge b-done">Done</span>';
-      var dl = (res && res.url) ? '<a class="dl-btn" href="'+res.url+'" download="'+res.name+'">'+DL+' Save</a>' : '';
-      var row = document.createElement('div'); row.className = 'file-row';
-      row.innerHTML = '<span class="name" title="'+f.name+'">'+f.name+'</span><span class="sz">'+fmtSize(f.size)+'</span>'+badge+dl;
+    list.innerHTML='';
+    files.forEach(function(f,i) {
+      var res=results[i];
+      var badge='<span class="badge b-wait">Waiting</span>';
+      if(res==='converting') badge='<span class="badge b-prog">Converting…</span>';
+      else if(res==='error') badge='<span class="badge b-err">Error</span>';
+      else if(res&&res.url)  badge='<span class="badge b-done">Done</span>';
+      var dl=(res&&res.url)?'<a class="dl-btn" href="'+res.url+'" download="'+res.name+'">'+DL+' Save</a>':'';
+      var row=document.createElement('div'); row.className='file-row';
+      row.innerHTML='<span class="name" title="'+f.name+'">'+f.name+'</span><span class="sz">'+fmtSize(f.size)+'</span>'+badge+dl;
       list.appendChild(row);
     });
   }
-
   btn.addEventListener('click', function() {
-    if (!files.length) return;
-    btn.disabled = true; dlAll.style.display = 'none'; sum.textContent = 'Converting…';
-    var q = parseInt(qual.value) / 100;
-    var i = 0;
+    if(!files.length) return;
+    btn.disabled=true; dlAll.style.display='none'; sum.textContent='Converting…';
+    var q=parseInt(qual.value)/100, i=0;
     function next() {
-      if (i >= files.length) {
-        var done = Object.values(results).filter(function(r) { return r && r.url; }).length;
-        var err  = Object.values(results).filter(function(r) { return r === 'error'; }).length;
-        sum.textContent = done + ' converted' + (err ? ', ' + err + ' failed' : '') + '.';
-        btn.disabled = false;
-        if (done > 1) dlAll.style.display = 'flex';
-        return;
+      if(i>=files.length) {
+        var done=Object.values(results).filter(function(r){return r&&r.url;}).length;
+        var err=Object.values(results).filter(function(r){return r==='error';}).length;
+        sum.textContent=done+' converted'+(err?', '+err+' failed':'')+'.';
+        btn.disabled=false; if(done>1) dlAll.style.display='flex'; return;
       }
-      if (results[i] && results[i].url) { i++; next(); return; }
-      results[i] = 'converting'; render();
-      var f = files[i];
-      heic2any({ blob: f, toType: 'image/jpeg', quality: q })
-        .then(function(blob) {
-          if (Array.isArray(blob)) blob = blob[0];
-          results[i] = { url: URL.createObjectURL(blob), name: f.name.replace(/\.heic$/i, '.jpg') };
-          i++; render(); next();
-        })
-        .catch(function(e) { console.error(e); results[i] = 'error'; i++; render(); next(); });
+      if(results[i]&&results[i].url){i++;next();return;}
+      results[i]='converting'; render();
+      var f=files[i];
+      heic2any({blob:f,toType:'image/jpeg',quality:q})
+        .then(function(blob){if(Array.isArray(blob))blob=blob[0];results[i]={url:URL.createObjectURL(blob),name:f.name.replace(/\.heic$/i,'.jpg')};i++;render();next();})
+        .catch(function(e){console.error(e);results[i]='error';i++;render();next();});
     }
     next();
   });
-
   dlAll.addEventListener('click', function() {
-    var items = Object.values(results).filter(function(r) { return r && r.url; });
-    var i = 0;
-    function next() { if (i>=items.length) return; var a=document.createElement('a'); a.href=items[i].url; a.download=items[i].name; a.click(); i++; setTimeout(next,160); }
+    var items=Object.values(results).filter(function(r){return r&&r.url;}), i=0;
+    function next(){if(i>=items.length)return;var a=document.createElement('a');a.href=items[i].url;a.download=items[i].name;a.click();i++;setTimeout(next,160);}
     next();
   });
 })();
 
-/* ══════════════════════════════
-   PDF PAGE EDITOR
-══════════════════════════════ */
+/* ══ PDF PAGE EDITOR ══ */
 (function() {
-  // pdf.js worker
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/build/pdf.worker.min.js';
+  var editor   = document.getElementById('pdf-editor');
+  var pageList = document.getElementById('page-list');
+  var fnameEl  = document.getElementById('pdf-fname');
+  var pcountEl = document.getElementById('pdf-pcount');
+  var btnUp    = document.getElementById('btn-up');
+  var btnDown  = document.getElementById('btn-down');
+  var btnDel   = document.getElementById('btn-del');
+  var btnSave  = document.getElementById('btn-save');
+  var sum      = document.getElementById('pdf-summary');
+  var addInput = document.getElementById('pdf-add');
 
-  var editor    = document.getElementById('pdf-editor');
-  var grid      = document.getElementById('page-grid');
-  var fnameEl   = document.getElementById('pdf-fname');
-  var pgcountEl = document.getElementById('pdf-pgcount');
-  var btnUp     = document.getElementById('pdf-move-up');
-  var btnDown   = document.getElementById('pdf-move-down');
-  var btnDel    = document.getElementById('pdf-delete');
-  var btnSave   = document.getElementById('pdf-save');
-  var sum       = document.getElementById('pdf-summary');
-  var addInput  = document.getElementById('pdf-add-input');
-
-  // State: array of { pdfBytes: ArrayBuffer, pageIndex: number, canvas: HTMLCanvasElement }
+  // pages = array of { buf: ArrayBuffer, srcIndex: number, label: string }
   var pages = [];
-  var selectedIdx = -1;
-  var origFileName = 'document.pdf';
-  var dragSrcIdx = null;
+  var sel = -1;
+  var dragSrc = null;
+  var origName = 'document.pdf';
 
-  setupDrop('pdf-drop', 'pdf-input', function(files) { if (files[0]) loadPDF(files[0]); });
+  setupDrop('pdf-drop','pdf-input', function(files){ if(files[0]) loadPDF(files[0], true); });
 
   addInput.addEventListener('change', function() {
-    if (addInput.files[0]) appendPDF(addInput.files[0]);
-    addInput.value = '';
+    if(addInput.files[0]) loadPDF(addInput.files[0], false);
+    addInput.value='';
   });
 
-  /* Load initial PDF */
-  function loadPDF(file) {
-    origFileName = file.name;
-    fnameEl.textContent = file.name;
-    sum.textContent = 'Loading…';
+  function loadPDF(file, replace) {
+    sum.textContent = 'Reading…';
     file.arrayBuffer().then(function(buf) {
-      pages = [];
-      selectedIdx = -1;
-      return buildPagesFromBuffer(buf);
-    }).then(function() {
-      editor.style.display = 'block';
-      renderGrid();
-      sum.textContent = '';
+      return PDFLib.PDFDocument.load(buf).then(function(doc) {
+        var count = doc.getPageCount();
+        if(replace) { pages=[]; sel=-1; origName=file.name; fnameEl.textContent=file.name; }
+        for(var i=0;i<count;i++) {
+          pages.push({ buf: buf, srcIndex: i, label: replace ? file.name : file.name });
+        }
+        editor.style.display = 'block';
+        renderList();
+        sum.textContent = replace ? '' : count+' pages added from '+file.name+'.';
+      });
     }).catch(function(e) {
       sum.textContent = 'Could not read PDF. It may be password-protected.';
       console.error(e);
     });
   }
 
-  /* Append pages from another PDF */
-  function appendPDF(file) {
-    sum.textContent = 'Adding pages…';
-    file.arrayBuffer().then(function(buf) {
-      return buildPagesFromBuffer(buf);
-    }).then(function() {
-      renderGrid();
-      sum.textContent = 'Pages added.';
-    }).catch(function(e) {
-      sum.textContent = 'Could not read that PDF.';
-      console.error(e);
-    });
-  }
-
-  /* Parse a PDF buffer into page entries with canvas previews */
-  function buildPagesFromBuffer(buf) {
-    var bufCopy = buf.slice(0); // keep a copy for pdf-lib later
-    return pdfjsLib.getDocument({ data: buf }).promise.then(function(pdfDoc) {
-      var total = pdfDoc.numPages;
-      var chain = Promise.resolve();
-      for (var p = 1; p <= total; p++) {
-        (function(pageNum) {
-          chain = chain.then(function() {
-            return pdfDoc.getPage(pageNum).then(function(page) {
-              var vp = page.getViewport({ scale: 1.0 });
-              var scale = 200 / vp.width; // render at ~200px wide
-              var viewport = page.getViewport({ scale: scale });
-              var canvas = document.createElement('canvas');
-              canvas.width  = viewport.width;
-              canvas.height = viewport.height;
-              return page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise.then(function() {
-                pages.push({ buf: bufCopy, srcPage: pageNum - 1, canvas: canvas });
-              });
-            });
-          });
-        })(p);
-      }
-      return chain;
-    });
-  }
-
-  /* Render the page grid */
-  function renderGrid() {
-    grid.innerHTML = '';
-    pgcountEl.textContent = pages.length + ' page' + (pages.length !== 1 ? 's' : '');
+  function renderList() {
+    pageList.innerHTML='';
+    pcountEl.textContent = pages.length+' page'+(pages.length!==1?'s':'');
     pages.forEach(function(pg, i) {
-      var card = document.createElement('div');
-      card.className = 'page-card' + (i === selectedIdx ? ' selected' : '');
-      card.draggable = true;
-      card.appendChild(pg.canvas.cloneNode(true)); // clone so we can re-render freely
-      var num = document.createElement('div'); num.className = 'page-num'; num.textContent = 'Page ' + (i + 1);
-      var hint = document.createElement('div'); hint.className = 'drag-hint'; hint.textContent = 'drag to reorder';
-      card.appendChild(num);
-      card.appendChild(hint);
+      var item = document.createElement('div');
+      item.className = 'page-item' + (i===sel?' selected':'');
+      item.draggable = true;
+      item.innerHTML =
+        '<span class="drag-handle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span>'
+        +'<div class="page-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>'
+        +'<div class="page-label"><div class="pg-num">Page '+(i+1)+'</div><div class="pg-src">'+pg.label+'</div></div>';
 
-      // Select
-      card.addEventListener('click', function() { selectedIdx = i; renderGrid(); updateToolbar(); });
+      item.addEventListener('click', function() { sel=i; renderList(); updateBtns(); });
 
-      // Drag to reorder
-      card.addEventListener('dragstart', function(e) { dragSrcIdx = i; card.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
-      card.addEventListener('dragend', function() { card.classList.remove('dragging'); renderGrid(); });
-      card.addEventListener('dragover', function(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; card.classList.add(i < dragSrcIdx ? 'drop-before' : 'drop-after'); });
-      card.addEventListener('dragleave', function() { card.classList.remove('drop-before'); card.classList.remove('drop-after'); });
-      card.addEventListener('drop', function(e) {
-        e.preventDefault();
-        card.classList.remove('drop-before'); card.classList.remove('drop-after');
-        if (dragSrcIdx === null || dragSrcIdx === i) return;
-        var moved = pages.splice(dragSrcIdx, 1)[0];
-        pages.splice(i, 0, moved);
-        selectedIdx = i;
-        dragSrcIdx = null;
-        renderGrid(); updateToolbar();
+      item.addEventListener('dragstart', function(e) { dragSrc=i; item.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
+      item.addEventListener('dragend',   function() { item.classList.remove('dragging'); renderList(); });
+      item.addEventListener('dragover',  function(e) { e.preventDefault(); item.classList.add('drag-over'); });
+      item.addEventListener('dragleave', function() { item.classList.remove('drag-over'); });
+      item.addEventListener('drop', function(e) {
+        e.preventDefault(); item.classList.remove('drag-over');
+        if(dragSrc===null||dragSrc===i) return;
+        var moved=pages.splice(dragSrc,1)[0]; pages.splice(i,0,moved);
+        sel=i; dragSrc=null; renderList(); updateBtns();
       });
 
-      grid.appendChild(card);
+      pageList.appendChild(item);
     });
-    updateToolbar();
+    updateBtns();
   }
 
-  function updateToolbar() {
-    var sel = selectedIdx >= 0 && selectedIdx < pages.length;
-    btnUp.disabled   = !sel || selectedIdx === 0;
-    btnDown.disabled = !sel || selectedIdx === pages.length - 1;
-    btnDel.disabled  = !sel || pages.length <= 1;
+  function updateBtns() {
+    var ok = sel>=0 && sel<pages.length;
+    btnUp.disabled   = !ok || sel===0;
+    btnDown.disabled = !ok || sel===pages.length-1;
+    btnDel.disabled  = !ok || pages.length<=1;
   }
 
   btnUp.addEventListener('click', function() {
-    if (selectedIdx <= 0) return;
-    var tmp = pages[selectedIdx]; pages[selectedIdx] = pages[selectedIdx-1]; pages[selectedIdx-1] = tmp;
-    selectedIdx--; renderGrid();
+    if(sel<=0) return;
+    var t=pages[sel]; pages[sel]=pages[sel-1]; pages[sel-1]=t; sel--; renderList();
   });
-
   btnDown.addEventListener('click', function() {
-    if (selectedIdx >= pages.length - 1) return;
-    var tmp = pages[selectedIdx]; pages[selectedIdx] = pages[selectedIdx+1]; pages[selectedIdx+1] = tmp;
-    selectedIdx++; renderGrid();
+    if(sel>=pages.length-1) return;
+    var t=pages[sel]; pages[sel]=pages[sel+1]; pages[sel+1]=t; sel++; renderList();
   });
-
   btnDel.addEventListener('click', function() {
-    if (pages.length <= 1 || selectedIdx < 0) return;
-    pages.splice(selectedIdx, 1);
-    if (selectedIdx >= pages.length) selectedIdx = pages.length - 1;
-    renderGrid();
-    sum.textContent = 'Page deleted.';
+    if(pages.length<=1||sel<0) return;
+    pages.splice(sel,1);
+    if(sel>=pages.length) sel=pages.length-1;
+    renderList(); sum.textContent='Page deleted.';
   });
 
-  /* Save — rebuild PDF using pdf-lib */
   btnSave.addEventListener('click', function() {
-    btnSave.disabled = true; sum.textContent = 'Saving…';
+    btnSave.disabled=true; sum.textContent='Building PDF…';
 
-    // Group pages by their source buffer to minimise loads
-    var loadedDocs = [];
-    var chain = Promise.resolve();
+    // Collect unique buffers
+    var bufs=[], bufDocs={};
+    pages.forEach(function(pg){ if(bufs.indexOf(pg.buf)===-1) bufs.push(pg.buf); });
 
-    // Load each unique buffer once
-    var uniqueBufs = [];
-    pages.forEach(function(pg) {
-      if (uniqueBufs.indexOf(pg.buf) === -1) uniqueBufs.push(pg.buf);
-    });
-
-    var bufToDoc = {};
-    uniqueBufs.forEach(function(buf, bi) {
-      chain = chain.then(function() {
-        return PDFLib.PDFDocument.load(buf).then(function(doc) { bufToDoc[bi] = doc; });
+    // Load each unique source doc once
+    var chain=Promise.resolve();
+    bufs.forEach(function(buf,bi) {
+      chain=chain.then(function(){
+        return PDFLib.PDFDocument.load(buf).then(function(doc){ bufDocs[bi]=doc; });
       });
     });
 
-    chain.then(function() {
+    chain.then(function(){
       return PDFLib.PDFDocument.create();
     }).then(function(outDoc) {
-      var c2 = Promise.resolve();
+      var c=Promise.resolve();
       pages.forEach(function(pg) {
-        var bi = uniqueBufs.indexOf(pg.buf);
-        c2 = c2.then(function() {
-          return outDoc.copyPages(bufToDoc[bi], [pg.srcPage]).then(function(copied) {
-            outDoc.addPage(copied[0]);
-          });
+        var bi=bufs.indexOf(pg.buf);
+        c=c.then(function(){
+          return outDoc.copyPages(bufDocs[bi],[pg.srcIndex]).then(function(cp){ outDoc.addPage(cp[0]); });
         });
       });
-      return c2.then(function() { return outDoc.save(); });
+      return c.then(function(){ return outDoc.save(); });
     }).then(function(bytes) {
-      var blob = new Blob([bytes], { type: 'application/pdf' });
-      var url  = URL.createObjectURL(blob);
-      var name = origFileName.replace(/\.pdf$/i, '_edited.pdf');
-      var a = document.createElement('a'); a.href = url; a.download = name; a.click();
-      sum.textContent = 'Saved as ' + name;
-      btnSave.disabled = false;
+      var blob=new Blob([bytes],{type:'application/pdf'});
+      var url=URL.createObjectURL(blob);
+      var name=origName.replace(/\.pdf$/i,'_edited.pdf');
+      var a=document.createElement('a'); a.href=url; a.download=name; a.click();
+      sum.textContent='Saved as '+name;
+      btnSave.disabled=false;
     }).catch(function(e) {
-      sum.textContent = 'Error saving PDF.';
-      console.error(e);
-      btnSave.disabled = false;
+      sum.textContent='Error saving PDF.'; console.error(e); btnSave.disabled=false;
     });
   });
 })();
