@@ -34,26 +34,14 @@
     header { text-align: center; margin-bottom: 1.75rem; }
     header h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -0.02em; }
     header p { margin-top: 0.35rem; font-size: 0.85rem; color: var(--text-muted); }
-    .tabs {
-      display: flex; gap: 4px; background: var(--surface2);
-      border: 0.5px solid var(--border); border-radius: var(--radius);
-      padding: 4px; margin-bottom: 1.5rem; width: 100%; max-width: 600px;
-    }
-    .tab-btn {
-      flex: 1; padding: 8px 6px; font-size: 0.82rem; font-weight: 500;
-      border: none; background: none; border-radius: 7px; cursor: pointer;
-      color: var(--text-muted); transition: background .12s, color .12s; font-family: inherit;
-    }
+    .tabs { display: flex; gap: 4px; background: var(--surface2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 4px; margin-bottom: 1.5rem; width: 100%; max-width: 640px; }
+    .tab-btn { flex: 1; padding: 8px 6px; font-size: 0.82rem; font-weight: 500; border: none; background: none; border-radius: 7px; cursor: pointer; color: var(--text-muted); transition: background .12s, color .12s; font-family: inherit; }
     .tab-btn.active { background: var(--surface); color: var(--text); border: 0.5px solid var(--border); }
     .tab-btn:hover:not(.active) { color: var(--text); }
-    .panel { display: none; width: 100%; max-width: 600px; }
+    .panel { display: none; width: 100%; max-width: 640px; }
     .panel.active { display: block; }
     .card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; }
-    .dropzone {
-      border: 1.5px dashed var(--border-md); border-radius: var(--radius);
-      padding: 2.25rem 1.5rem; text-align: center; cursor: pointer;
-      transition: background .15s, border-color .15s; background: var(--surface2);
-    }
+    .dropzone { border: 1.5px dashed var(--border-md); border-radius: var(--radius); padding: 2.25rem 1.5rem; text-align: center; cursor: pointer; transition: background .15s, border-color .15s; background: var(--surface2); }
     .dropzone:hover, .dropzone.over { border-color: #378add; background: var(--blue-bg); }
     .dropzone svg { width: 32px; height: 32px; stroke: var(--text-muted); margin: 0 auto 10px; display: block; }
     .dropzone p { font-size: 0.88rem; color: var(--text-muted); }
@@ -87,8 +75,8 @@
 
     /* PDF editor */
     .pdf-meta { display: flex; align-items: center; justify-content: space-between; margin: 1rem 0 0.75rem; flex-wrap: wrap; gap: 6px; }
-    .pdf-meta .pdf-name { font-size: 0.85rem; font-weight: 500; }
-    .pdf-meta .pdf-count { font-size: 0.78rem; color: var(--text-muted); }
+    .pdf-meta .pdf-name { font-size: 0.85rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 340px; }
+    .pdf-meta .pdf-count { font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; }
     .pdf-toolbar { display: flex; gap: 7px; margin-bottom: 1rem; flex-wrap: wrap; }
     .tool-btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 11px; font-size: 0.79rem; font-weight: 500; border-radius: var(--radius); cursor: pointer; border: 0.5px solid var(--border-md); background: var(--surface); color: var(--text); transition: background .1s; font-family: inherit; white-space: nowrap; }
     .tool-btn:hover:not(:disabled) { background: var(--surface2); }
@@ -97,25 +85,18 @@
     .tool-btn.red { border-color: var(--red-text); color: var(--red-text); }
     .tool-btn.red:hover:not(:disabled) { background: var(--red-bg); }
 
-    /* Page list */
-    .page-list { display: flex; flex-direction: column; gap: 5px; }
-    .page-item {
-      display: flex; align-items: center; gap: 10px;
-      background: var(--surface2); border: 2px solid transparent;
-      border-radius: var(--radius); padding: 10px 12px; cursor: pointer;
-      transition: border-color .12s; user-select: none;
-    }
-    .page-item:hover { border-color: var(--border-md); }
-    .page-item.selected { border-color: #378add; background: var(--blue-bg); }
-    .page-item.dragging { opacity: 0.4; }
-    .page-item.drag-over { border-color: #378add; border-style: dashed; }
-    .page-icon { flex-shrink: 0; width: 32px; height: 40px; background: white; border: 0.5px solid var(--border-md); border-radius: 3px; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .page-icon svg { width: 16px; height: 16px; stroke: var(--text-faint); }
-    .page-label { flex: 1; font-size: 0.84rem; }
-    .page-label .pg-num { font-weight: 500; }
-    .page-label .pg-src { font-size: 0.72rem; color: var(--text-faint); margin-top: 1px; }
-    .drag-handle { cursor: grab; color: var(--text-faint); }
-    .drag-handle svg { width: 14px; height: 14px; stroke: currentColor; display: block; }
+    /* Page grid with thumbnails */
+    .page-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+    .page-card { background: var(--surface2); border: 2px solid transparent; border-radius: var(--radius); padding: 8px 8px 6px; cursor: pointer; transition: border-color .12s, box-shadow .12s; display: flex; flex-direction: column; align-items: center; gap: 5px; user-select: none; }
+    .page-card:hover { border-color: var(--border-md); }
+    .page-card.selected { border-color: #378add; box-shadow: 0 0 0 3px rgba(55,138,221,0.15); }
+    .page-card.dragging { opacity: 0.35; }
+    .page-card.drag-over { border-color: #378add; border-style: dashed; }
+    .thumb-wrap { width: 100%; background: white; border-radius: 4px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.13); display: flex; align-items: center; justify-content: center; min-height: 80px; }
+    .thumb-wrap canvas { width: 100%; height: auto; display: block; }
+    .thumb-wrap .thumb-loading { font-size: 0.7rem; color: var(--text-faint); padding: 20px 0; }
+    .page-num { font-size: 0.72rem; color: var(--text-muted); }
+    .drag-hint { font-size: 0.62rem; color: var(--text-faint); }
 
     footer { margin-top: 2.5rem; font-size: 0.76rem; color: var(--text-faint); text-align: center; }
   </style>
@@ -129,7 +110,7 @@
 
 <div class="tabs">
   <button class="tab-btn active" onclick="switchTab('heic',this)">HEIC → JPG</button>
-  <button class="tab-btn" onclick="switchTab('pdf',this)">PDF Page Editor</button>
+  <button class="tab-btn" onclick="switchTab('pdf',this); initPdfTab();">PDF Page Editor</button>
 </div>
 
 <!-- HEIC -->
@@ -161,7 +142,8 @@
 <!-- PDF PAGE EDITOR -->
 <div class="panel" id="panel-pdf">
   <div class="card">
-    <div class="dropzone" id="pdf-drop">
+    <div id="pdf-loading-msg" style="text-align:center;padding:1.5rem;font-size:0.85rem;color:var(--text-muted);display:none">Loading PDF viewer…</div>
+    <div class="dropzone" id="pdf-drop" style="display:none">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
       <p>Drop a PDF here, or click to browse</p>
       <span>Reorder, delete, or add pages — then save</span>
@@ -175,12 +157,12 @@
       </div>
       <div class="pdf-toolbar">
         <button class="tool-btn" id="btn-up" disabled>
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
-          Move up
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Move left
         </button>
         <button class="tool-btn" id="btn-down" disabled>
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-          Move down
+          Move right
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
         <button class="tool-btn red" id="btn-del" disabled>
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
@@ -192,7 +174,7 @@
           <input type="file" id="pdf-add" accept=".pdf,application/pdf">
         </label>
       </div>
-      <div class="page-list" id="page-list"></div>
+      <div class="page-grid" id="page-grid"></div>
       <div class="actions">
         <button class="primary-btn" id="btn-save">Save PDF</button>
       </div>
@@ -281,9 +263,32 @@ function setupDrop(dropId, inputId, onFiles) {
 })();
 
 /* ══ PDF PAGE EDITOR ══ */
-(function() {
+var pdfTabReady = false;
+
+function initPdfTab() {
+  if(pdfTabReady) return;
+  // Show loading, then inject pdf.js lazily
+  var loadMsg = document.getElementById('pdf-loading-msg');
+  loadMsg.style.display = 'block';
+
+  var script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/build/pdf.min.js';
+  script.onload = function() {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/build/pdf.worker.min.js';
+    loadMsg.style.display = 'none';
+    document.getElementById('pdf-drop').style.display = '';
+    pdfTabReady = true;
+    startPdfEditor();
+  };
+  script.onerror = function() {
+    loadMsg.textContent = 'Failed to load PDF viewer. Check your internet connection.';
+  };
+  document.head.appendChild(script);
+}
+
+function startPdfEditor() {
+  var grid     = document.getElementById('page-grid');
   var editor   = document.getElementById('pdf-editor');
-  var pageList = document.getElementById('page-list');
   var fnameEl  = document.getElementById('pdf-fname');
   var pcountEl = document.getElementById('pdf-pcount');
   var btnUp    = document.getElementById('btn-up');
@@ -293,31 +298,28 @@ function setupDrop(dropId, inputId, onFiles) {
   var sum      = document.getElementById('pdf-summary');
   var addInput = document.getElementById('pdf-add');
 
-  // pages = array of { buf: ArrayBuffer, srcIndex: number, label: string }
-  var pages = [];
-  var sel = -1;
-  var dragSrc = null;
-  var origName = 'document.pdf';
+  // pages = [{ buf, srcIndex, label, canvas }]
+  var pages = [], sel = -1, dragSrc = null, origName = 'document.pdf';
 
   setupDrop('pdf-drop','pdf-input', function(files){ if(files[0]) loadPDF(files[0], true); });
-
-  addInput.addEventListener('change', function() {
-    if(addInput.files[0]) loadPDF(addInput.files[0], false);
-    addInput.value='';
-  });
+  addInput.addEventListener('change', function() { if(addInput.files[0]) loadPDF(addInput.files[0], false); addInput.value=''; });
 
   function loadPDF(file, replace) {
-    sum.textContent = 'Reading…';
+    sum.textContent = replace ? 'Loading…' : 'Adding pages…';
     file.arrayBuffer().then(function(buf) {
+      // Count pages with pdf-lib (fast, no rendering)
       return PDFLib.PDFDocument.load(buf).then(function(doc) {
         var count = doc.getPageCount();
         if(replace) { pages=[]; sel=-1; origName=file.name; fnameEl.textContent=file.name; }
         for(var i=0;i<count;i++) {
-          pages.push({ buf: buf, srcIndex: i, label: replace ? file.name : file.name });
+          pages.push({ buf: buf, srcIndex: i, label: file.name, canvas: null });
         }
         editor.style.display = 'block';
-        renderList();
-        sum.textContent = replace ? '' : count+' pages added from '+file.name+'.';
+        document.getElementById('pdf-drop').style.display = 'none';
+        renderGrid();
+        sum.textContent = replace ? '' : count+' pages added.';
+        // Now render thumbnails progressively in background
+        renderThumbnails(buf, replace ? 0 : pages.length - count, count);
       });
     }).catch(function(e) {
       sum.textContent = 'Could not read PDF. It may be password-protected.';
@@ -325,32 +327,83 @@ function setupDrop(dropId, inputId, onFiles) {
     });
   }
 
-  function renderList() {
-    pageList.innerHTML='';
-    pcountEl.textContent = pages.length+' page'+(pages.length!==1?'s':'');
+  // Render page thumbnails one by one without blocking the UI
+  function renderThumbnails(buf, startIdx, count) {
+    pdfjsLib.getDocument({ data: buf.slice(0) }).promise.then(function(pdfDoc) {
+      var i = 0;
+      function nextThumb() {
+        if(i >= count) return;
+        var pageNum = i + 1;
+        var globalIdx = startIdx + i;
+        pdfDoc.getPage(pageNum).then(function(page) {
+          var vp = page.getViewport({ scale: 1 });
+          var scale = 180 / vp.width;
+          var viewport = page.getViewport({ scale: scale });
+          var canvas = document.createElement('canvas');
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          return page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise.then(function() {
+            if(pages[globalIdx]) {
+              pages[globalIdx].canvas = canvas;
+              updateThumb(globalIdx, canvas);
+            }
+            i++;
+            nextThumb();
+          });
+        }).catch(function() { i++; nextThumb(); });
+      }
+      nextThumb();
+    });
+  }
+
+  function updateThumb(idx, canvas) {
+    var card = grid.children[idx];
+    if(!card) return;
+    var wrap = card.querySelector('.thumb-wrap');
+    if(!wrap) return;
+    wrap.innerHTML = '';
+    wrap.appendChild(canvas.cloneNode(true));
+  }
+
+  function renderGrid() {
+    grid.innerHTML = '';
+    pcountEl.textContent = pages.length + ' page' + (pages.length!==1?'s':'');
     pages.forEach(function(pg, i) {
-      var item = document.createElement('div');
-      item.className = 'page-item' + (i===sel?' selected':'');
-      item.draggable = true;
-      item.innerHTML =
-        '<span class="drag-handle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span>'
-        +'<div class="page-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>'
-        +'<div class="page-label"><div class="pg-num">Page '+(i+1)+'</div><div class="pg-src">'+pg.label+'</div></div>';
+      var card = document.createElement('div');
+      card.className = 'page-card' + (i===sel?' selected':'');
+      card.draggable = true;
 
-      item.addEventListener('click', function() { sel=i; renderList(); updateBtns(); });
+      var wrap = document.createElement('div');
+      wrap.className = 'thumb-wrap';
+      if(pg.canvas) {
+        wrap.appendChild(pg.canvas.cloneNode(true));
+      } else {
+        var loading = document.createElement('div');
+        loading.className = 'thumb-loading';
+        loading.textContent = 'Loading…';
+        wrap.appendChild(loading);
+      }
+      card.appendChild(wrap);
 
-      item.addEventListener('dragstart', function(e) { dragSrc=i; item.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
-      item.addEventListener('dragend',   function() { item.classList.remove('dragging'); renderList(); });
-      item.addEventListener('dragover',  function(e) { e.preventDefault(); item.classList.add('drag-over'); });
-      item.addEventListener('dragleave', function() { item.classList.remove('drag-over'); });
-      item.addEventListener('drop', function(e) {
-        e.preventDefault(); item.classList.remove('drag-over');
+      var num = document.createElement('div'); num.className='page-num'; num.textContent='Page '+(i+1);
+      var hint = document.createElement('div'); hint.className='drag-hint'; hint.textContent='drag to reorder';
+      card.appendChild(num);
+      card.appendChild(hint);
+
+      card.addEventListener('click', function() { sel=i; renderGrid(); updateBtns(); });
+
+      card.addEventListener('dragstart', function(e) { dragSrc=i; card.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
+      card.addEventListener('dragend',   function() { card.classList.remove('dragging'); renderGrid(); });
+      card.addEventListener('dragover',  function(e) { e.preventDefault(); card.classList.add('drag-over'); });
+      card.addEventListener('dragleave', function() { card.classList.remove('drag-over'); });
+      card.addEventListener('drop', function(e) {
+        e.preventDefault(); card.classList.remove('drag-over');
         if(dragSrc===null||dragSrc===i) return;
         var moved=pages.splice(dragSrc,1)[0]; pages.splice(i,0,moved);
-        sel=i; dragSrc=null; renderList(); updateBtns();
+        sel=i; dragSrc=null; renderGrid(); updateBtns();
       });
 
-      pageList.appendChild(item);
+      grid.appendChild(card);
     });
     updateBtns();
   }
@@ -364,43 +417,32 @@ function setupDrop(dropId, inputId, onFiles) {
 
   btnUp.addEventListener('click', function() {
     if(sel<=0) return;
-    var t=pages[sel]; pages[sel]=pages[sel-1]; pages[sel-1]=t; sel--; renderList();
+    var t=pages[sel]; pages[sel]=pages[sel-1]; pages[sel-1]=t; sel--; renderGrid();
   });
   btnDown.addEventListener('click', function() {
     if(sel>=pages.length-1) return;
-    var t=pages[sel]; pages[sel]=pages[sel+1]; pages[sel+1]=t; sel++; renderList();
+    var t=pages[sel]; pages[sel]=pages[sel+1]; pages[sel+1]=t; sel++; renderGrid();
   });
   btnDel.addEventListener('click', function() {
     if(pages.length<=1||sel<0) return;
     pages.splice(sel,1);
     if(sel>=pages.length) sel=pages.length-1;
-    renderList(); sum.textContent='Page deleted.';
+    renderGrid(); sum.textContent='Page deleted.';
   });
 
   btnSave.addEventListener('click', function() {
     btnSave.disabled=true; sum.textContent='Building PDF…';
-
-    // Collect unique buffers
     var bufs=[], bufDocs={};
     pages.forEach(function(pg){ if(bufs.indexOf(pg.buf)===-1) bufs.push(pg.buf); });
-
-    // Load each unique source doc once
     var chain=Promise.resolve();
     bufs.forEach(function(buf,bi) {
-      chain=chain.then(function(){
-        return PDFLib.PDFDocument.load(buf).then(function(doc){ bufDocs[bi]=doc; });
-      });
+      chain=chain.then(function(){ return PDFLib.PDFDocument.load(buf).then(function(doc){ bufDocs[bi]=doc; }); });
     });
-
-    chain.then(function(){
-      return PDFLib.PDFDocument.create();
-    }).then(function(outDoc) {
+    chain.then(function(){ return PDFLib.PDFDocument.create(); }).then(function(outDoc) {
       var c=Promise.resolve();
       pages.forEach(function(pg) {
         var bi=bufs.indexOf(pg.buf);
-        c=c.then(function(){
-          return outDoc.copyPages(bufDocs[bi],[pg.srcIndex]).then(function(cp){ outDoc.addPage(cp[0]); });
-        });
+        c=c.then(function(){ return outDoc.copyPages(bufDocs[bi],[pg.srcIndex]).then(function(cp){ outDoc.addPage(cp[0]); }); });
       });
       return c.then(function(){ return outDoc.save(); });
     }).then(function(bytes) {
@@ -414,7 +456,7 @@ function setupDrop(dropId, inputId, onFiles) {
       sum.textContent='Error saving PDF.'; console.error(e); btnSave.disabled=false;
     });
   });
-})();
+}
 </script>
 </body>
 </html>
