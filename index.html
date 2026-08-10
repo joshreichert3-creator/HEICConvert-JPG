@@ -73,9 +73,9 @@
     .dl-all-btn svg { width: 14px; height: 14px; stroke: currentColor; }
     .summary { font-size: 0.78rem; color: var(--text-muted); margin-top: 9px; min-height: 16px; text-align: center; }
 
-    /* PDF editor */
+    /* ── PDF editor ── */
     .pdf-meta { display: flex; align-items: center; justify-content: space-between; margin: 1rem 0 0.75rem; flex-wrap: wrap; gap: 6px; }
-    .pdf-meta .pdf-name { font-size: 0.85rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 400px; }
+    .pdf-meta .pdf-name { font-size: 0.85rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 420px; }
     .pdf-meta .pdf-count { font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; }
     .pdf-toolbar { display: flex; gap: 7px; margin-bottom: 1rem; flex-wrap: wrap; }
     .tool-btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 11px; font-size: 0.79rem; font-weight: 500; border-radius: var(--radius); cursor: pointer; border: 0.5px solid var(--border-md); background: var(--surface); color: var(--text); transition: background .1s; font-family: inherit; white-space: nowrap; }
@@ -85,40 +85,53 @@
     .tool-btn.red { border-color: var(--red-text); color: var(--red-text); }
     .tool-btn.red:hover:not(:disabled) { background: var(--red-bg); }
 
-    /* Page grid — larger thumbnails */
-    .page-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
-    .page-card {
+    /* Full-size page list — one page per row */
+    .page-stack { display: flex; flex-direction: column; gap: 16px; }
+
+    .page-row {
+      display: flex; align-items: flex-start; gap: 12px;
       background: var(--surface2); border: 2.5px solid transparent;
-      border-radius: var(--radius); padding: 8px 8px 7px;
-      cursor: pointer; transition: border-color .12s, box-shadow .12s;
-      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      border-radius: var(--radius); padding: 12px;
+      cursor: pointer; transition: border-color .12s;
       user-select: none;
     }
-    .page-card:hover { border-color: var(--border-md); }
-    .page-card.selected { border-color: #378add; box-shadow: 0 0 0 3px rgba(55,138,221,0.15); }
-    .page-card.dragging { opacity: 0.35; }
-    .page-card.drag-over { border-color: #378add; border-style: dashed; }
-    .thumb-wrap {
-      width: 100%; background: white; border-radius: 5px;
-      overflow: hidden; box-shadow: 0 1px 5px rgba(0,0,0,0.15);
+    .page-row:hover { border-color: var(--border-md); }
+    .page-row.selected { border-color: #378add; background: var(--blue-bg); }
+    .page-row.dragging { opacity: 0.35; }
+    .page-row.drag-over { border-color: #378add; border-style: dashed; }
+
+    /* Left: drag handle + page number */
+    .page-row-left {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 8px; flex-shrink: 0; padding-top: 4px;
+    }
+    .drag-handle { cursor: grab; color: var(--text-faint); }
+    .drag-handle svg { width: 16px; height: 16px; stroke: currentColor; display: block; }
+    .page-num-badge {
+      font-size: 0.72rem; font-weight: 600; color: var(--text-muted);
+      background: var(--surface); border: 0.5px solid var(--border);
+      border-radius: 6px; padding: 2px 7px; white-space: nowrap;
+    }
+
+    /* Right: full-width canvas */
+    .page-canvas-wrap {
+      flex: 1; background: white;
+      border-radius: 6px; overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
       display: flex; align-items: center; justify-content: center;
-      aspect-ratio: 3/4; /* A4-ish portrait ratio */
-      position: relative;
+      min-height: 120px; position: relative;
     }
-    .thumb-wrap canvas { width: 100%; height: 100%; object-fit: contain; display: block; }
-    .thumb-spinner {
+    .page-canvas-wrap canvas,
+    .page-canvas-wrap img {
+      width: 100%; height: auto; display: block;
+    }
+    .page-spinner {
       position: absolute; inset: 0; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 8px;
+      align-items: center; justify-content: center; gap: 8px; background: white;
     }
-    .spinner-ring {
-      width: 24px; height: 24px; border: 2px solid var(--border-md);
-      border-top-color: #378add; border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
+    .spinner-ring { width: 24px; height: 24px; border: 2px solid #e0e0e0; border-top-color: #378add; border-radius: 50%; animation: spin .8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .thumb-spinner span { font-size: 0.68rem; color: var(--text-faint); }
-    .page-num { font-size: 0.75rem; font-weight: 500; color: var(--text-muted); }
-    .drag-hint { font-size: 0.65rem; color: var(--text-faint); }
+    .page-spinner span { font-size: 0.72rem; color: var(--text-faint); }
 
     footer { margin-top: 2.5rem; font-size: 0.76rem; color: var(--text-faint); text-align: center; }
   </style>
@@ -135,7 +148,7 @@
   <button class="tab-btn" onclick="switchTab('pdf',this);initPdfTab();">PDF Page Editor</button>
 </div>
 
-<!-- HEIC -->
+<!-- ══ HEIC ══ -->
 <div class="panel active" id="panel-heic">
   <div class="card">
     <div class="dropzone" id="heic-drop">
@@ -161,7 +174,7 @@
   </div>
 </div>
 
-<!-- PDF PAGE EDITOR -->
+<!-- ══ PDF PAGE EDITOR ══ -->
 <div class="panel" id="panel-pdf">
   <div class="card">
     <div id="pdf-init-msg" style="text-align:center;padding:1.5rem 1rem;font-size:0.85rem;color:var(--text-muted)">
@@ -175,7 +188,6 @@
       </div>
       <input type="file" id="pdf-input" accept=".pdf,application/pdf">
     </div>
-
     <div id="pdf-editor" style="display:none">
       <div class="pdf-meta">
         <span class="pdf-name" id="pdf-fname"></span>
@@ -183,16 +195,16 @@
       </div>
       <div class="pdf-toolbar">
         <button class="tool-btn" id="btn-up" disabled>
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-          Move left
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+          Move up
         </button>
         <button class="tool-btn" id="btn-down" disabled>
-          Move right
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          Move down
         </button>
         <button class="tool-btn red" id="btn-del" disabled>
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-          Delete
+          Delete page
         </button>
         <label class="tool-btn" style="cursor:pointer">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -200,7 +212,7 @@
           <input type="file" id="pdf-add" accept=".pdf,application/pdf">
         </label>
       </div>
-      <div class="page-grid" id="page-grid"></div>
+      <div class="page-stack" id="page-stack"></div>
       <div class="actions">
         <button class="primary-btn" id="btn-save">Save PDF</button>
       </div>
@@ -212,77 +224,75 @@
 <footer>All processing happens in your browser · No data leaves your device</footer>
 
 <script>
-var DL = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+var DL='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
 
-function switchTab(name, btn) {
-  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
-  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+function switchTab(name,btn){
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
   document.getElementById('panel-'+name).classList.add('active');
   btn.classList.add('active');
 }
-
-function fmtSize(b){ return b<1048576?Math.round(b/1024)+' KB':(b/1048576).toFixed(1)+' MB'; }
-
-function setupDrop(dropId, inputId, onFiles){
-  var drop=document.getElementById(dropId), inp=document.getElementById(inputId);
-  drop.addEventListener('click', function(){ inp.click(); });
-  drop.addEventListener('dragover', function(e){ e.preventDefault(); drop.classList.add('over'); });
-  drop.addEventListener('dragleave', function(){ drop.classList.remove('over'); });
-  drop.addEventListener('drop', function(e){ e.preventDefault(); drop.classList.remove('over'); onFiles(Array.from(e.dataTransfer.files)); });
-  inp.addEventListener('change', function(){ onFiles(Array.from(inp.files)); inp.value=''; });
+function fmtSize(b){return b<1048576?Math.round(b/1024)+' KB':(b/1048576).toFixed(1)+' MB';}
+function setupDrop(dropId,inputId,onFiles){
+  var drop=document.getElementById(dropId),inp=document.getElementById(inputId);
+  drop.addEventListener('click',function(){inp.click();});
+  drop.addEventListener('dragover',function(e){e.preventDefault();drop.classList.add('over');});
+  drop.addEventListener('dragleave',function(){drop.classList.remove('over');});
+  drop.addEventListener('drop',function(e){e.preventDefault();drop.classList.remove('over');onFiles(Array.from(e.dataTransfer.files));});
+  inp.addEventListener('change',function(){onFiles(Array.from(inp.files));inp.value='';});
 }
 
 /* ══ HEIC ══ */
 (function(){
-  var list=document.getElementById('heic-list'), btn=document.getElementById('heic-btn'),
-      dlAll=document.getElementById('heic-dl-all'), sum=document.getElementById('heic-summary'),
-      qual=document.getElementById('heic-quality'), qout=document.getElementById('heic-qout');
-  var files=[], results={};
-  qual.oninput=function(){ qout.textContent=qual.value+'%'; };
+  var list=document.getElementById('heic-list'),btn=document.getElementById('heic-btn'),
+      dlAll=document.getElementById('heic-dl-all'),sum=document.getElementById('heic-summary'),
+      qual=document.getElementById('heic-quality'),qout=document.getElementById('heic-qout');
+  var files=[],results={};
+  qual.oninput=function(){qout.textContent=qual.value+'%';};
   setupDrop('heic-drop','heic-input',add);
   function add(nf){
-    var h=nf.filter(function(f){ return /\.heic$/i.test(f.name)||f.type==='image/heic'||f.type==='image/heif'; });
-    if(!h.length){ sum.textContent='No .heic files found.'; return; }
-    h.forEach(function(f){ if(!files.find(function(x){ return x.name===f.name&&x.size===f.size; })) files.push(f); });
-    results={}; render(); btn.disabled=false; sum.textContent=''; dlAll.style.display='none';
+    var h=nf.filter(function(f){return /\.heic$/i.test(f.name)||f.type==='image/heic'||f.type==='image/heif';});
+    if(!h.length){sum.textContent='No .heic files found.';return;}
+    h.forEach(function(f){if(!files.find(function(x){return x.name===f.name&&x.size===f.size;}))files.push(f);});
+    results={};render();btn.disabled=false;sum.textContent='';dlAll.style.display='none';
   }
   function render(){
     list.innerHTML='';
     files.forEach(function(f,i){
       var res=results[i];
       var badge='<span class="badge b-wait">Waiting</span>';
-      if(res==='converting') badge='<span class="badge b-prog">Converting…</span>';
-      else if(res==='error') badge='<span class="badge b-err">Error</span>';
-      else if(res&&res.url)  badge='<span class="badge b-done">Done</span>';
+      if(res==='converting')badge='<span class="badge b-prog">Converting…</span>';
+      else if(res==='error')badge='<span class="badge b-err">Error</span>';
+      else if(res&&res.url)badge='<span class="badge b-done">Done</span>';
       var dl=(res&&res.url)?'<a class="dl-btn" href="'+res.url+'" download="'+res.name+'">'+DL+' Save</a>':'';
-      var row=document.createElement('div'); row.className='file-row';
+      var row=document.createElement('div');row.className='file-row';
       row.innerHTML='<span class="name" title="'+f.name+'">'+f.name+'</span><span class="sz">'+fmtSize(f.size)+'</span>'+badge+dl;
       list.appendChild(row);
     });
   }
   btn.addEventListener('click',function(){
-    if(!files.length) return;
-    btn.disabled=true; dlAll.style.display='none'; sum.textContent='Converting…';
-    var q=parseInt(qual.value)/100, i=0;
+    if(!files.length)return;
+    btn.disabled=true;dlAll.style.display='none';sum.textContent='Converting…';
+    var q=parseInt(qual.value)/100,i=0;
     function next(){
       if(i>=files.length){
-        var done=Object.values(results).filter(function(r){ return r&&r.url; }).length;
-        var err=Object.values(results).filter(function(r){ return r==='error'; }).length;
+        var done=Object.values(results).filter(function(r){return r&&r.url;}).length;
+        var err=Object.values(results).filter(function(r){return r==='error';}).length;
         sum.textContent=done+' converted'+(err?', '+err+' failed':'')+'.';
-        btn.disabled=false; if(done>1) dlAll.style.display='flex'; return;
+        btn.disabled=false;if(done>1)dlAll.style.display='flex';return;
       }
-      if(results[i]&&results[i].url){ i++; next(); return; }
-      results[i]='converting'; render();
+      if(results[i]&&results[i].url){i++;next();return;}
+      results[i]='converting';render();
       var f=files[i];
       heic2any({blob:f,toType:'image/jpeg',quality:q})
-        .then(function(blob){ if(Array.isArray(blob))blob=blob[0]; results[i]={url:URL.createObjectURL(blob),name:f.name.replace(/\.heic$/i,'.jpg')}; i++;render();next(); })
-        .catch(function(e){ console.error(e); results[i]='error'; i++;render();next(); });
+        .then(function(blob){if(Array.isArray(blob))blob=blob[0];results[i]={url:URL.createObjectURL(blob),name:f.name.replace(/\.heic$/i,'.jpg')};i++;render();next();})
+        .catch(function(e){console.error(e);results[i]='error';i++;render();next();});
     }
     next();
   });
   dlAll.addEventListener('click',function(){
-    var items=Object.values(results).filter(function(r){ return r&&r.url; }), i=0;
-    function next(){ if(i>=items.length)return; var a=document.createElement('a');a.href=items[i].url;a.download=items[i].name;a.click();i++;setTimeout(next,160); }
+    var items=Object.values(results).filter(function(r){return r&&r.url;}),i=0;
+    function next(){if(i>=items.length)return;var a=document.createElement('a');a.href=items[i].url;a.download=items[i].name;a.click();i++;setTimeout(next,160);}
     next();
   });
 })();
@@ -291,32 +301,26 @@ function setupDrop(dropId, inputId, onFiles){
 var pdfTabReady=false;
 
 function initPdfTab(){
-  if(pdfTabReady) return;
+  if(pdfTabReady)return;
   var msg=document.getElementById('pdf-init-msg');
   msg.textContent='Loading PDF viewer…';
-
-  // Load pdf.js only now
   var s=document.createElement('script');
   s.src='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/build/pdf.min.js';
   s.onload=function(){
-    // Set worker BEFORE doing anything else
     pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/build/pdf.worker.min.js';
-    // Give the worker a moment to initialise
     setTimeout(function(){
       msg.style.display='none';
       document.getElementById('pdf-dropzone-wrap').style.display='block';
       pdfTabReady=true;
       startPdfEditor();
-    }, 300);
+    },300);
   };
-  s.onerror=function(){
-    msg.textContent='Failed to load PDF viewer. Check your internet connection and refresh.';
-  };
+  s.onerror=function(){msg.textContent='Failed to load PDF viewer. Check your connection and refresh.';};
   document.head.appendChild(s);
 }
 
 function startPdfEditor(){
-  var grid    =document.getElementById('page-grid');
+  var stack   =document.getElementById('page-stack');
   var editor  =document.getElementById('pdf-editor');
   var fnameEl =document.getElementById('pdf-fname');
   var pcountEl=document.getElementById('pdf-pcount');
@@ -328,26 +332,26 @@ function startPdfEditor(){
   var addInput=document.getElementById('pdf-add');
 
   // pages = [{ buf, srcIndex, label, dataUrl }]
-  var pages=[], sel=-1, dragSrc=null, origName='document.pdf';
+  var pages=[],sel=-1,dragSrc=null,origName='document.pdf';
 
-  setupDrop('pdf-drop','pdf-input',function(files){ if(files[0]) loadPDF(files[0],true); });
-  addInput.addEventListener('change',function(){ if(addInput.files[0]) loadPDF(addInput.files[0],false); addInput.value=''; });
+  setupDrop('pdf-drop','pdf-input',function(files){if(files[0])loadPDF(files[0],true);});
+  addInput.addEventListener('change',function(){if(addInput.files[0])loadPDF(addInput.files[0],false);addInput.value='';});
 
-  function loadPDF(file, replace){
+  function loadPDF(file,replace){
     sum.textContent=replace?'Loading…':'Adding pages…';
     file.arrayBuffer().then(function(buf){
       return PDFLib.PDFDocument.load(buf).then(function(doc){
         var count=doc.getPageCount();
-        if(replace){ pages=[]; sel=-1; origName=file.name; fnameEl.textContent=file.name; }
+        if(replace){pages=[];sel=-1;origName=file.name;fnameEl.textContent=file.name;}
+        var startIdx=pages.length;
         for(var i=0;i<count;i++){
-          pages.push({ buf:buf, srcIndex:i, label:file.name, dataUrl:null });
+          pages.push({buf:buf,srcIndex:i,label:file.name,dataUrl:null});
         }
         document.getElementById('pdf-dropzone-wrap').style.display='none';
         editor.style.display='block';
-        renderGrid();
-        sum.textContent=replace?'':''+count+' pages added.';
-        // Render thumbnails using pdf.js — pass a fresh copy of the buffer
-        renderAllThumbs(buf.slice(0), replace ? 0 : pages.length-count, count);
+        renderStack();
+        sum.textContent=replace?'':count+' pages added.';
+        renderAllThumbs(buf.slice(0),startIdx,count);
       });
     }).catch(function(e){
       sum.textContent='Could not read PDF. It may be password-protected.';
@@ -355,83 +359,81 @@ function startPdfEditor(){
     });
   }
 
-  function renderAllThumbs(buf, startIdx, count){
-    // Load the pdf.js document fresh (separate from pdf-lib)
-    pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise.then(function(pdfJsDoc){
+  function renderAllThumbs(buf,startIdx,count){
+    pdfjsLib.getDocument({data:new Uint8Array(buf)}).promise.then(function(pdfJsDoc){
       var i=0;
-      function nextThumb(){
-        if(i>=count) return;
-        var pageNum=i+1;
-        var globalIdx=startIdx+i;
+      function next(){
+        if(i>=count)return;
+        var pageNum=i+1,globalIdx=startIdx+i;
         pdfJsDoc.getPage(pageNum).then(function(page){
-          // Render at 2x pixel density for sharpness, display at CSS size
-          var vp=page.getViewport({ scale:1 });
-          var scale=340/vp.width; // render at 340px wide (displayed ~160-200px)
-          var viewport=page.getViewport({ scale:scale });
+          var vp=page.getViewport({scale:1});
+          // Render at full card width — use devicePixelRatio for sharpness
+          var dpr=window.devicePixelRatio||1;
+          var cssWidth=stack.clientWidth-80; // account for left sidebar
+          if(cssWidth<300)cssWidth=300;
+          var scale=(cssWidth*dpr)/vp.width;
+          var viewport=page.getViewport({scale:scale});
           var canvas=document.createElement('canvas');
           canvas.width=viewport.width;
           canvas.height=viewport.height;
-          var ctx=canvas.getContext('2d');
-          page.render({ canvasContext:ctx, viewport:viewport }).promise.then(function(){
-            var dataUrl=canvas.toDataURL('image/jpeg', 0.85);
+          canvas.style.width=cssWidth+'px';
+          canvas.style.height=(viewport.height/dpr)+'px';
+          page.render({canvasContext:canvas.getContext('2d'),viewport:viewport}).promise.then(function(){
             if(pages[globalIdx]){
-              pages[globalIdx].dataUrl=dataUrl;
-              // Update just this card's thumbnail
-              var card=grid.children[globalIdx];
-              if(card){
-                var wrap=card.querySelector('.thumb-wrap');
-                var img=document.createElement('img');
-                img.src=dataUrl;
-                img.style.cssText='width:100%;height:100%;object-fit:contain;display:block;';
+              pages[globalIdx].canvas=canvas;
+              // Swap spinner for real canvas in the DOM
+              var row=stack.children[globalIdx];
+              if(row){
+                var wrap=row.querySelector('.page-canvas-wrap');
                 wrap.innerHTML='';
-                wrap.appendChild(img);
+                wrap.appendChild(canvas);
               }
             }
-            i++; nextThumb();
+            i++;next();
           });
-        }).catch(function(){ i++; nextThumb(); });
+        }).catch(function(){i++;next();});
       }
-      nextThumb();
-    }).catch(function(e){ console.error('pdf.js load error',e); });
+      next();
+    }).catch(function(e){console.error('pdf.js error',e);});
   }
 
-  function renderGrid(){
-    grid.innerHTML='';
+  function renderStack(){
+    stack.innerHTML='';
     pcountEl.textContent=pages.length+' page'+(pages.length!==1?'s':'');
     pages.forEach(function(pg,i){
-      var card=document.createElement('div');
-      card.className='page-card'+(i===sel?' selected':'');
-      card.draggable=true;
+      var row=document.createElement('div');
+      row.className='page-row'+(i===sel?' selected':'');
+      row.draggable=true;
 
-      // Thumbnail
-      var wrap=document.createElement('div'); wrap.className='thumb-wrap';
-      if(pg.dataUrl){
-        var img=document.createElement('img');
-        img.src=pg.dataUrl;
-        img.style.cssText='width:100%;height:100%;object-fit:contain;display:block;';
-        wrap.appendChild(img);
+      // Left sidebar
+      var left=document.createElement('div');left.className='page-row-left';
+      left.innerHTML='<span class="drag-handle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span>'
+        +'<span class="page-num-badge">'+(i+1)+'</span>';
+
+      // Canvas area
+      var wrap=document.createElement('div');wrap.className='page-canvas-wrap';
+      if(pg.canvas){
+        wrap.appendChild(pg.canvas.cloneNode(true));
       } else {
-        wrap.innerHTML='<div class="thumb-spinner"><div class="spinner-ring"></div><span>Rendering…</span></div>';
+        wrap.innerHTML='<div class="page-spinner"><div class="spinner-ring"></div><span>Rendering…</span></div>';
       }
-      card.appendChild(wrap);
 
-      var num=document.createElement('div'); num.className='page-num'; num.textContent='Page '+(i+1);
-      var hint=document.createElement('div'); hint.className='drag-hint'; hint.textContent='drag to reorder';
-      card.appendChild(num); card.appendChild(hint);
+      row.appendChild(left);
+      row.appendChild(wrap);
 
-      card.addEventListener('click',function(){ sel=i; renderGrid(); updateBtns(); });
-      card.addEventListener('dragstart',function(e){ dragSrc=i; card.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
-      card.addEventListener('dragend',  function(){ card.classList.remove('dragging'); renderGrid(); });
-      card.addEventListener('dragover', function(e){ e.preventDefault(); card.classList.add('drag-over'); });
-      card.addEventListener('dragleave',function(){ card.classList.remove('drag-over'); });
-      card.addEventListener('drop',function(e){
-        e.preventDefault(); card.classList.remove('drag-over');
-        if(dragSrc===null||dragSrc===i) return;
-        var moved=pages.splice(dragSrc,1)[0]; pages.splice(i,0,moved);
-        sel=i; dragSrc=null; renderGrid(); updateBtns();
+      row.addEventListener('click',function(){sel=i;renderStack();updateBtns();});
+      row.addEventListener('dragstart',function(e){dragSrc=i;row.classList.add('dragging');e.dataTransfer.effectAllowed='move';});
+      row.addEventListener('dragend',  function(){row.classList.remove('dragging');renderStack();});
+      row.addEventListener('dragover', function(e){e.preventDefault();row.classList.add('drag-over');});
+      row.addEventListener('dragleave',function(){row.classList.remove('drag-over');});
+      row.addEventListener('drop',function(e){
+        e.preventDefault();row.classList.remove('drag-over');
+        if(dragSrc===null||dragSrc===i)return;
+        var moved=pages.splice(dragSrc,1)[0];pages.splice(i,0,moved);
+        sel=i;dragSrc=null;renderStack();updateBtns();
       });
 
-      grid.appendChild(card);
+      stack.appendChild(row);
     });
     updateBtns();
   }
@@ -444,44 +446,44 @@ function startPdfEditor(){
   }
 
   btnUp.addEventListener('click',function(){
-    if(sel<=0) return;
-    var t=pages[sel]; pages[sel]=pages[sel-1]; pages[sel-1]=t; sel--; renderGrid();
+    if(sel<=0)return;
+    var t=pages[sel];pages[sel]=pages[sel-1];pages[sel-1]=t;sel--;renderStack();
   });
   btnDown.addEventListener('click',function(){
-    if(sel>=pages.length-1) return;
-    var t=pages[sel]; pages[sel]=pages[sel+1]; pages[sel+1]=t; sel++; renderGrid();
+    if(sel>=pages.length-1)return;
+    var t=pages[sel];pages[sel]=pages[sel+1];pages[sel+1]=t;sel++;renderStack();
   });
   btnDel.addEventListener('click',function(){
-    if(pages.length<=1||sel<0) return;
+    if(pages.length<=1||sel<0)return;
     pages.splice(sel,1);
-    if(sel>=pages.length) sel=pages.length-1;
-    renderGrid(); sum.textContent='Page deleted.';
+    if(sel>=pages.length)sel=pages.length-1;
+    renderStack();sum.textContent='Page deleted.';
   });
 
   btnSave.addEventListener('click',function(){
-    btnSave.disabled=true; sum.textContent='Building PDF…';
-    var bufs=[], bufDocs={};
-    pages.forEach(function(pg){ if(bufs.indexOf(pg.buf)===-1) bufs.push(pg.buf); });
+    btnSave.disabled=true;sum.textContent='Building PDF…';
+    var bufs=[],bufDocs={};
+    pages.forEach(function(pg){if(bufs.indexOf(pg.buf)===-1)bufs.push(pg.buf);});
     var chain=Promise.resolve();
     bufs.forEach(function(buf,bi){
-      chain=chain.then(function(){ return PDFLib.PDFDocument.load(buf).then(function(doc){ bufDocs[bi]=doc; }); });
+      chain=chain.then(function(){return PDFLib.PDFDocument.load(buf).then(function(doc){bufDocs[bi]=doc;});});
     });
-    chain.then(function(){ return PDFLib.PDFDocument.create(); }).then(function(outDoc){
+    chain.then(function(){return PDFLib.PDFDocument.create();}).then(function(outDoc){
       var c=Promise.resolve();
       pages.forEach(function(pg){
         var bi=bufs.indexOf(pg.buf);
-        c=c.then(function(){ return outDoc.copyPages(bufDocs[bi],[pg.srcIndex]).then(function(cp){ outDoc.addPage(cp[0]); }); });
+        c=c.then(function(){return outDoc.copyPages(bufDocs[bi],[pg.srcIndex]).then(function(cp){outDoc.addPage(cp[0]);});});
       });
-      return c.then(function(){ return outDoc.save(); });
+      return c.then(function(){return outDoc.save();});
     }).then(function(bytes){
       var blob=new Blob([bytes],{type:'application/pdf'});
       var url=URL.createObjectURL(blob);
       var name=origName.replace(/\.pdf$/i,'_edited.pdf');
-      var a=document.createElement('a'); a.href=url; a.download=name; a.click();
+      var a=document.createElement('a');a.href=url;a.download=name;a.click();
       sum.textContent='Saved as '+name;
       btnSave.disabled=false;
     }).catch(function(e){
-      sum.textContent='Error saving PDF.'; console.error(e); btnSave.disabled=false;
+      sum.textContent='Error saving PDF.';console.error(e);btnSave.disabled=false;
     });
   });
 }
