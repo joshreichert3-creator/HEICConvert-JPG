@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>File Tools</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
@@ -225,8 +228,10 @@
     .wm-caption { margin-top:6px; font-size:.74rem; color:var(--text-faint); text-align:center; }
     .wm-controls { display:flex; flex-direction:column; gap:14px; }
     .wm-controls .quality-row { margin-top:0; }
-    .wm-controls .quality-row label { min-width:54px; }
-    .ctl-group { display:flex; flex-direction:column; gap:12px; }
+    .wm-controls .quality-row label { min-width:96px; }
+    .wm-fields { display:flex; flex-direction:column; gap:12px; }
+    .ctl-pos { margin-left:4px; font-size:.72rem; color:var(--text-faint); }
+    .wm-note { font-size:.74rem; line-height:1.45; color:var(--text-faint); }
     .ctl { display:flex; flex-direction:column; gap:6px; font-size:.8rem; color:var(--text-muted); }
     .ctl input[type=text] { font:inherit; font-size:.86rem; color:var(--text); background:var(--surface); border:.5px solid var(--border-md); border-radius:7px; padding:7px 9px; width:100%; }
     .ctl-inline { display:flex; flex-wrap:wrap; gap:12px 20px; align-items:flex-start; }
@@ -234,15 +239,6 @@
     .check { display:flex; align-items:center; gap:7px; font-size:.8rem; color:var(--text-muted); cursor:pointer; }
     .check input { accent-color:var(--blue); }
     .swatch-row { display:flex; align-items:center; gap:2px; min-height:30px; }
-    .seg { display:inline-flex; align-self:flex-start; gap:3px; padding:3px; background:var(--surface2); border:.5px solid var(--border); border-radius:9px; }
-    .seg-btn { padding:5px 16px; font-size:.8rem; font-weight:500; border:none; background:none; border-radius:7px; color:var(--text-muted); cursor:pointer; }
-    .seg-btn.active { background:var(--surface); color:var(--text); box-shadow:0 0 0 .5px var(--border-md); }
-    .pos-grid { display:grid; grid-template-columns:repeat(3,26px); grid-template-rows:repeat(3,19px); gap:3px; padding:4px; width:max-content; background:var(--surface2); border:.5px solid var(--border); border-radius:8px; }
-    .pos-grid.off { opacity:.35; }
-    .pos-btn { padding:0; border:none; border-radius:4px; background:var(--surface); box-shadow:inset 0 0 0 .5px var(--border-md); cursor:pointer; }
-    .pos-btn:hover:not(:disabled) { box-shadow:inset 0 0 0 1px var(--blue); }
-    .pos-btn[aria-checked="true"] { background:var(--blue); box-shadow:none; }
-    .pos-btn:disabled { cursor:default; }
     .logo-pick { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
     .dl-all-btn.small { padding:7px 12px; font-size:.8rem; }
     label.dl-all-btn:focus-within { outline:2px solid var(--blue); outline-offset:2px; }
@@ -333,58 +329,36 @@
         <p class="wm-caption" id="wm-caption" hidden>Click an image in the list below to preview it.</p>
       </div>
       <div class="wm-controls">
-        <div class="seg" role="radiogroup" aria-label="Watermark type">
-          <button class="seg-btn active" data-type="text" role="radio" aria-checked="true">Text</button>
-          <button class="seg-btn" data-type="logo" role="radio" aria-checked="false">Logo</button>
-        </div>
-        <div id="wm-text-opts" class="ctl-group">
-          <label class="ctl">Text <input type="text" id="wm-text" maxlength="120" autocomplete="off"></label>
-          <div class="ctl-inline">
-            <label class="ctl">Font
-              <select id="wm-font">
-                <option value="sans">Sans-serif</option>
-                <option value="serif">Times New Roman</option>
-              </select>
-            </label>
-            <div class="ctl">Color
-              <div class="swatch-row" id="wm-colors">
-                <button class="swatch" data-color="#ffffff" style="--c:#ffffff" aria-label="White" title="White"></button>
-                <button class="swatch" data-color="#000000" style="--c:#000000" aria-label="Black" title="Black"></button>
-                <label class="swatch custom" title="Other color"><input type="color" id="wm-color" value="#ffffff" aria-label="Other color"></label>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div id="wm-logo-opts" class="ctl-group" hidden>
-          <div class="ctl">Logo
+        <div class="wm-fields">
+          <label class="ctl"><span>Address <span class="ctl-pos">top left</span></span>
+            <input type="text" id="wm-addr" maxlength="80" autocomplete="off" placeholder="e.g. 123 Main Street"></label>
+          <label class="ctl"><span>Company name <span class="ctl-pos">centre, faded</span></span>
+            <input type="text" id="wm-company" maxlength="80" autocomplete="organization" placeholder="e.g. Your Company Real Estate"></label>
+          <div class="ctl"><span>Logo <span class="ctl-pos">bottom left</span></span>
             <div class="logo-pick">
-              <label class="dl-all-btn small">Choose image<input type="file" id="wm-logo" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif"></label>
-              <span class="logo-name" id="wm-logo-name">A PNG with a transparent background works best</span>
+              <label class="dl-all-btn small">Choose logo<input type="file" id="wm-logo" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif"></label>
+              <button class="link-btn" id="wm-logo-clear" type="button" hidden>Remove</button>
             </div>
+            <span class="logo-name" id="wm-logo-name"></span>
           </div>
+          <label class="ctl"><span>Contact <span class="ctl-pos">bottom right</span></span>
+            <input type="text" id="wm-contact" maxlength="80" autocomplete="off" placeholder="e.g. Call or text 555.123.4567"></label>
         </div>
         <div class="ctl-inline">
-          <div class="ctl">Position
-            <div class="pos-grid" id="wm-pos" role="radiogroup" aria-label="Position">
-              <button class="pos-btn" data-pos="0,0" role="radio" aria-label="Top left"></button>
-              <button class="pos-btn" data-pos="1,0" role="radio" aria-label="Top center"></button>
-              <button class="pos-btn" data-pos="2,0" role="radio" aria-label="Top right"></button>
-              <button class="pos-btn" data-pos="0,1" role="radio" aria-label="Middle left"></button>
-              <button class="pos-btn" data-pos="1,1" role="radio" aria-label="Center"></button>
-              <button class="pos-btn" data-pos="2,1" role="radio" aria-label="Middle right"></button>
-              <button class="pos-btn" data-pos="0,2" role="radio" aria-label="Bottom left"></button>
-              <button class="pos-btn" data-pos="1,2" role="radio" aria-label="Bottom center"></button>
-              <button class="pos-btn" data-pos="2,2" role="radio" aria-label="Bottom right"></button>
+          <div class="ctl">Color
+            <div class="swatch-row" id="wm-colors">
+              <button class="swatch" data-color="#ffffff" style="--c:#ffffff" aria-label="White" title="White"></button>
+              <button class="swatch" data-color="#000000" style="--c:#000000" aria-label="Black" title="Black"></button>
+              <label class="swatch custom" title="Other color"><input type="color" id="wm-color" value="#ffffff" aria-label="Other color"></label>
             </div>
           </div>
           <div class="ctl checks">
-            <label class="check"><input type="checkbox" id="wm-tile"> Repeat across image</label>
             <label class="check"><input type="checkbox" id="wm-shadow" checked> Soft shadow</label>
           </div>
         </div>
-        <div class="quality-row"><label for="wm-size">Size</label><input type="range" id="wm-size" min="5" max="100" step="1" value="25"><span class="qout" id="wm-size-out">25%</span></div>
-        <div class="quality-row"><label for="wm-opacity">Opacity</label><input type="range" id="wm-opacity" min="10" max="100" step="1" value="70"><span class="qout" id="wm-opacity-out">70%</span></div>
-        <div class="quality-row"><label for="wm-angle">Angle</label><input type="range" id="wm-angle" min="-45" max="45" step="1" value="0"><span class="qout" id="wm-angle-out">0°</span></div>
+        <div class="quality-row"><label for="wm-size">Size</label><input type="range" id="wm-size" min="60" max="160" step="5" value="100"><span class="qout" id="wm-size-out">100%</span></div>
+        <div class="quality-row"><label for="wm-center">Centre opacity</label><input type="range" id="wm-center" min="10" max="100" step="1" value="75"><span class="qout" id="wm-center-out">75%</span></div>
+        <p class="wm-note" id="wm-note" hidden>Company name, contact, logo and style are remembered in this browser for next time. The address isn’t.</p>
       </div>
     </div>
 
@@ -800,65 +774,101 @@ async function thumbFrom(img, max) {
 /* ══ WATERMARK ══ */
 (() => {
   const list = $('wm-list'), btn = $('wm-btn'), zipBtn = $('wm-zip'), clearBtn = $('wm-clear'), sum = $('wm-summary'),
-        previewBox = $('wm-preview'), textInput = $('wm-text'), fontSel = $('wm-font'), colorInput = $('wm-color'),
-        logoInput = $('wm-logo'), logoName = $('wm-logo-name'), tileBox = $('wm-tile'), shadowBox = $('wm-shadow'),
-        posGrid = $('wm-pos'), textOpts = $('wm-text-opts'), logoOpts = $('wm-logo-opts'),
-        sliders = { size: [$('wm-size'), $('wm-size-out'), '%'], opacity: [$('wm-opacity'), $('wm-opacity-out'), '%'], angle: [$('wm-angle'), $('wm-angle-out'), '°'] };
-  const segBtns = Array.from(document.querySelectorAll('#panel-wm .seg-btn'));
+        previewBox = $('wm-preview'), colorInput = $('wm-color'), shadowBox = $('wm-shadow'), note = $('wm-note'),
+        logoInput = $('wm-logo'), logoName = $('wm-logo-name'), logoClear = $('wm-logo-clear'),
+        fields = { addr: $('wm-addr'), company: $('wm-company'), contact: $('wm-contact') },
+        sliders = { size: [$('wm-size'), $('wm-size-out')], center: [$('wm-center'), $('wm-center-out')] };
   const swatches = Array.from(document.querySelectorAll('#wm-colors .swatch[data-color]'));
-  const posBtns = Array.from(posGrid.querySelectorAll('.pos-btn'));
 
-  // The watermark, sized relative to each image's shorter side so mixed photo sizes look alike.
-  const S = { type: 'text', text: '© ' + new Date().getFullYear(), font: 'sans', color: '#ffffff',
-              pos: [2, 2], tile: false, shadow: true, size: 25, opacity: 70, angle: 0 };
-  const FONTS = { sans: ['600', '"Helvetica Neue", Helvetica, Arial, "Liberation Sans", sans-serif'],
-                  serif: ['700', '"Times New Roman", Times, "Liberation Serif", serif'] };
+  // A branded layout: address top left, company name faded in the centre, logo bottom left and
+  // contact line bottom right. Everything scales with each image's shorter side.
+  const S = { addr: '', company: '', contact: '', color: '#ffffff', shadow: true, size: 100, center: 75 };
+  const FAMILY = '"Fira Sans", "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, "Liberation Sans", sans-serif';
+  const SMALL = 0.8, TRACK = 0.05;            // small-capital size and letter spacing, in ems
+  const NO_MARK = 'Fill in at least one field, or choose a logo.';
+  const NO_LOGO = 'No logo? The company name goes here instead.';
+  const STORE = 'fileTools.watermark.v1';
   let logo = null, items = [], nextId = 1, selId = null, busy = false, prepChain = Promise.resolve();
-  let previewBase = null, previewToken = 0, previewQueued = false;
+  let previewBase = null, previewToken = 0, previewQueued = false, saveTimer = null;
   const previewCanvas = document.createElement('canvas');
 
-  textInput.value = S.text;
+  // The web font loads once; drawing waits for it, or uses a system font if it hasn't arrived in 3s.
+  let fontWait = null;
+  function fontsReady() {
+    if (!fontWait) fontWait = Promise.race([
+      Promise.all(['400 40px "Fira Sans"', '600 40px "Fira Sans"'].map(f => document.fonts.load(f))).catch(() => {}),
+      new Promise(r => setTimeout(r, 3000))
+    ]);
+    return fontWait;
+  }
+
+  /* Small capitals, drawn letter by letter so they look the same in every browser: capitals,
+     digits and punctuation full size, lowercase letters as smaller capitals, lightly spaced. */
+  function smallCaps(ctx, text, px, weight) {
+    const glyphs = [];
+    let x = 0;
+    for (const ch of text) {
+      const up = ch.toUpperCase(), size = up !== ch ? px * SMALL : px;
+      ctx.font = weight + ' ' + size + 'px ' + FAMILY;
+      glyphs.push({ ch: up, size, x });
+      x += ctx.measureText(up).width + px * TRACK;
+    }
+    ctx.font = weight + ' ' + px + 'px ' + FAMILY;
+    const cap = ctx.measureText('H').actualBoundingBoxAscent || px * 0.7;
+    return { glyphs, weight, cap, width: Math.max(0, x - px * TRACK) };
+  }
+  function fitCaps(ctx, text, px, weight, maxWidth) {
+    const t = smallCaps(ctx, text, px, weight);
+    return t.width > maxWidth ? smallCaps(ctx, text, px * maxWidth / t.width, weight) : t;
+  }
+  function drawCaps(ctx, t, x, baseline) {
+    for (const g of t.glyphs) { ctx.font = t.weight + ' ' + g.size + 'px ' + FAMILY; ctx.fillText(g.ch, x + g.x, baseline); }
+  }
 
   function drawWatermark(ctx, W, H) {
-    const short = Math.min(W, H);
-    let mw, mh, drawMark;
-    if (S.type === 'text') {
-      const text = S.text.trim();
-      if (!text) return;
-      const [weight, family] = FONTS[S.font];
-      ctx.font = weight + ' 100px ' + family;
-      const w100 = ctx.measureText(text).width || 1;
-      const px = Math.min((S.size / 100) * short * 100 / w100, short * 0.35);
-      ctx.font = weight + ' ' + px + 'px ' + family;
-      const m = ctx.measureText(text);
-      const asc = m.actualBoundingBoxAscent || px * 0.75, desc = m.actualBoundingBoxDescent || px * 0.2;
-      mw = m.width; mh = asc + desc;
-      drawMark = () => { ctx.fillStyle = S.color; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.fillText(text, 0, (asc - desc) / 2); };
-    } else {
-      if (!logo) return;
-      mw = (S.size / 100) * short; mh = mw * logo.h / logo.w;
-      if (mh > short * 0.9) { mw *= short * 0.9 / mh; mh = short * 0.9; }
-      drawMark = () => ctx.drawImage(logo.img, -mw / 2, -mh / 2, mw, mh);
-    }
-    const rad = S.angle * Math.PI / 180, cos = Math.abs(Math.cos(rad)), sin = Math.abs(Math.sin(rad));
-    const bw = mw * cos + mh * sin, bh = mw * sin + mh * cos;           // footprint once rotated
+    const short = Math.min(W, H), k = S.size / 100, m = short * 0.045;
+    const addr = S.addr.trim(), company = S.company.trim(), contact = S.contact.trim();
+    const bottom = H - m, textBase = bottom - short * 0.016 * k;
     ctx.save();
-    ctx.globalAlpha = S.opacity / 100;
-    if (S.shadow) {
-      const dark = S.type === 'logo' || luminance(S.color) > 0.5;          // dark shadow behind light marks, light glow behind dark ones
-      ctx.shadowColor = dark ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.55)';
-      ctx.shadowBlur = short * 0.008;
+    ctx.fillStyle = S.color; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    if (S.shadow) {                                  // dark shadow behind light text, light glow behind dark text
+      ctx.shadowColor = luminance(S.color) > 0.5 ? 'rgba(0,0,0,0.42)' : 'rgba(255,255,255,0.6)';
+      ctx.shadowBlur = short * 0.007; ctx.shadowOffsetY = short * 0.0015;
     }
-    const put = (cx, cy) => { ctx.save(); ctx.translate(cx, cy); ctx.rotate(rad); drawMark(); ctx.restore(); };
-    if (S.tile) {
-      const stepX = bw + Math.max(bw * 0.5, short * 0.08), stepY = bh + Math.max(bh * 1.5, short * 0.08);
-      const rows = Math.ceil(H / stepY) + 1, cols = Math.ceil(W / stepX) + 1;
-      for (let r = -1; r <= rows; r++)
-        for (let c = -1; c <= cols; c++) put(c * stepX + (r & 1 ? stepX / 2 : 0), r * stepY + stepY / 2);
-    } else {
-      const m = short * 0.03, [col, row] = S.pos;
-      put(col === 0 ? m + bw / 2 : col === 1 ? W / 2 : W - m - bw / 2,
-          row === 0 ? m + bh / 2 : row === 1 ? H / 2 : H - m - bh / 2);
+    ctx.globalAlpha = 0.95;
+
+    if (addr) {                                      // top left
+      const t = fitCaps(ctx, addr, short * 0.05 * k, 400, W - 2 * m);
+      drawCaps(ctx, t, m, m + t.cap);
+    }
+
+    let leftW = 0, leftH = 0;                        // bottom left: the logo, or the company name as a wordmark
+    if (logo) {
+      let h = short * 0.12 * k, w = h * logo.w / logo.h;
+      if (w > W * 0.42) { h *= W * 0.42 / w; w = W * 0.42; }
+      ctx.drawImage(logo.img, m, bottom - h, w, h);
+      leftW = w; leftH = h;
+    } else if (company) {
+      const t = fitCaps(ctx, company, short * 0.072 * k, 600, W * 0.45);
+      drawCaps(ctx, t, m, textBase);
+      leftW = t.width; leftH = t.cap;
+    }
+
+    if (contact) {                                   // bottom right, beside the logo, or just above it if there isn't room
+      const gap = short * 0.04, px = short * 0.055 * k;
+      const room = W - 2 * m - (leftW ? leftW + gap : 0);
+      let t = smallCaps(ctx, contact, px, 400), base = textBase;
+      if (t.width > room) {
+        if (room >= t.width * 0.75) t = smallCaps(ctx, contact, px * room / t.width, 400);
+        else { t = fitCaps(ctx, contact, px, 400, W - 2 * m); base = bottom - leftH - gap * 0.6; }
+      }
+      drawCaps(ctx, t, W - m - t.width, base);
+    }
+
+    if (company) {                                   // centre, faded
+      ctx.globalAlpha = S.center / 100;
+      const t = fitCaps(ctx, company, short * 0.052 * k, 400, W * 0.9);
+      drawCaps(ctx, t, (W - t.width) / 2, (H + t.cap) / 2);
     }
     ctx.restore();
   }
@@ -866,20 +876,18 @@ async function thumbFrom(img, max) {
     const n = parseInt(hex.slice(1), 16);
     return (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
   }
-  const hasMark = () => S.type === 'text' ? !!S.text.trim() : !!logo;
+  const hasMark = () => !!(S.addr.trim() || S.company.trim() || S.contact.trim() || logo);
 
   /* ── Controls ── */
   function syncControls() {
-    segBtns.forEach(b => { const on = b.dataset.type === S.type; b.classList.toggle('active', on); b.setAttribute('aria-checked', on); });
-    textOpts.hidden = S.type !== 'text'; logoOpts.hidden = S.type !== 'logo';
+    for (const [key, input] of Object.entries(fields)) if (input.value !== S[key]) input.value = S[key];
     swatches.forEach(b => b.setAttribute('aria-pressed', b.dataset.color === S.color));
     colorInput.value = S.color;
-    posBtns.forEach(b => { b.setAttribute('aria-checked', b.dataset.pos === S.pos.join(',')); b.disabled = S.tile; });
-    posGrid.classList.toggle('off', S.tile);
-    for (const [key, [input, out, unit]] of Object.entries(sliders)) {
-      input.value = S[key];
-      out.textContent = (key === 'angle' && S[key] < 0 ? '−' + (-S[key]) : S[key]) + unit;
-    }
+    shadowBox.checked = S.shadow;
+    for (const [key, [input, out]] of Object.entries(sliders)) { input.value = S[key]; out.textContent = S[key] + '%'; }
+    logoName.textContent = logo ? logo.name : NO_LOGO;
+    logoName.title = logo ? logo.name : '';
+    logoClear.hidden = !logo;
   }
   function changed(patch) {
     Object.assign(S, patch);
@@ -888,30 +896,58 @@ async function thumbFrom(img, max) {
     let stale = 0;
     items.forEach(it => { if (it.status === 'done') { URL.revokeObjectURL(it.url); it.url = it.out = null; it.status = 'wait'; stale++; } });
     if (stale) sum.textContent = 'Settings changed. Choose Watermark all to apply them.';
-    render(); schedulePreview();
+    render(); schedulePreview(); queueSave();
   }
-  segBtns.forEach(b => b.addEventListener('click', () => changed({ type: b.dataset.type })));
-  textInput.addEventListener('input', () => changed({ text: textInput.value }));
-  fontSel.addEventListener('change', () => changed({ font: fontSel.value }));
+  for (const [key, input] of Object.entries(fields)) input.addEventListener('input', () => changed({ [key]: input.value }));
   swatches.forEach(b => b.addEventListener('click', () => changed({ color: b.dataset.color })));
   colorInput.addEventListener('input', () => changed({ color: colorInput.value.toLowerCase() }));
-  posBtns.forEach(b => b.addEventListener('click', () => changed({ pos: b.dataset.pos.split(',').map(Number) })));
-  tileBox.addEventListener('change', () => changed({ tile: tileBox.checked }));
   shadowBox.addEventListener('change', () => changed({ shadow: shadowBox.checked }));
   for (const [key, [input]] of Object.entries(sliders)) input.addEventListener('input', () => changed({ [key]: +input.value }));
+
+  function setLogo(src, name) {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => { logo = { img, src, name, w: img.naturalWidth || 300, h: img.naturalHeight || 150 }; resolve(true); };
+      img.onerror = () => resolve(false);
+      img.src = src;
+    });
+  }
   logoInput.addEventListener('change', () => {
     const f = logoInput.files[0]; logoInput.value = '';
     if (!f) return;
-    const url = URL.createObjectURL(f), img = new Image();
-    img.onload = () => {
-      if (logo) URL.revokeObjectURL(logo.url);
-      logo = { img, url, w: img.naturalWidth || 300, h: img.naturalHeight || 150 };
-      logoName.textContent = f.name; logoName.title = f.name;
-      changed({});
-    };
-    img.onerror = () => { URL.revokeObjectURL(url); logoName.textContent = 'That logo can’t be read. Try a PNG or JPG.'; };
-    img.src = url;
+    const fail = () => { logoName.textContent = 'That logo can’t be read. Try a PNG or JPG.'; };
+    const reader = new FileReader();       // kept as a data URL so it can be remembered for next time
+    reader.onload = async () => { if (await setLogo(reader.result, f.name)) changed({}); else fail(); };
+    reader.onerror = fail;
+    reader.readAsDataURL(f);
   });
+  logoClear.addEventListener('click', () => { logo = null; changed({}); });
+
+  /* ── Remembered settings: everything but the address, which changes with each property ── */
+  const store = (() => {
+    try { localStorage.setItem(STORE + '.test', '1'); localStorage.removeItem(STORE + '.test'); return localStorage; }
+    catch (e) { return null; }
+  })();
+  function queueSave() { if (store) { clearTimeout(saveTimer); saveTimer = setTimeout(save, 400); } }
+  function save() {
+    const data = { company: S.company, contact: S.contact, color: S.color, shadow: S.shadow, size: S.size, center: S.center };
+    try { store.setItem(STORE, JSON.stringify(logo ? { ...data, logo: { src: logo.src, name: logo.name } } : data)); }
+    catch (e) { try { store.setItem(STORE, JSON.stringify(data)); } catch (e2) {} }   // a very large logo may not fit
+  }
+  async function restore() {
+    if (!store) return;
+    note.hidden = false;
+    let data = null;
+    try { data = JSON.parse(store.getItem(STORE) || 'null'); } catch (e) {}
+    if (!data || typeof data !== 'object') return;
+    for (const key of ['company', 'contact']) if (typeof data[key] === 'string') S[key] = data[key];
+    if (/^#[0-9a-f]{6}$/i.test(data.color || '')) S.color = data.color.toLowerCase();
+    if (typeof data.shadow === 'boolean') S.shadow = data.shadow;
+    if (data.size >= 60 && data.size <= 160) S.size = +data.size;
+    if (data.center >= 10 && data.center <= 100) S.center = +data.center;
+    const l = data.logo;
+    if (l && typeof l.src === 'string' && l.src.startsWith('data:image/')) await setLogo(l.src, String(l.name || 'logo'));
+  }
 
   /* ── Images ── */
   setupDrop('wm-drop', 'wm-input', add);
@@ -972,7 +1008,8 @@ async function thumbFrom(img, max) {
     zipBtn.hidden = busy || done < 2;
     clearBtn.hidden = busy || !items.length;
     $('wm-caption').hidden = items.length < 2;
-    if (!hasMark() && items.length && !busy && S.type === 'logo') sum.textContent = 'Choose a logo image to use as the watermark.';
+    if (!hasMark() && items.length && !busy) sum.textContent = NO_MARK;
+    else if (sum.textContent === NO_MARK) sum.textContent = '';
   }
 
   list.addEventListener('click', e => {
@@ -1029,6 +1066,8 @@ async function thumbFrom(img, max) {
       if (previewBase) previewBase.canvas.width = 0;
       previewBase = { id: it.id, canvas: base };
     }
+    await fontsReady();
+    if (token !== previewToken) return;
     const base = previewBase.canvas;
     previewCanvas.width = base.width; previewCanvas.height = base.height;
     const ctx = previewCanvas.getContext('2d');
@@ -1044,7 +1083,8 @@ async function thumbFrom(img, max) {
     if (file.type === 'image/webp' || /\.webp$/i.test(file.name)) return 'image/webp';
     return 'image/jpeg';
   }
-  function watermarkFull(it) {
+  async function watermarkFull(it) {
+    await fontsReady();
     const type = outputType(it.file);
     return withImage(it.blob, async img => {
       let W = img.naturalWidth, H = img.naturalHeight, resized = false;
@@ -1112,6 +1152,8 @@ async function thumbFrom(img, max) {
   });
 
   syncControls(); render();
+  restore().then(() => { syncControls(); render(); schedulePreview(); });
+  fontsReady().then(schedulePreview);
 })();
 
 /* ══ IMAGES → PDF ══ */
