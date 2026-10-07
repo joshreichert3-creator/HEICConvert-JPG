@@ -358,7 +358,7 @@
         </div>
         <div class="quality-row"><label for="wm-size">Size</label><input type="range" id="wm-size" min="60" max="160" step="5" value="100"><span class="qout" id="wm-size-out">100%</span></div>
         <div class="quality-row"><label for="wm-center">Centre opacity</label><input type="range" id="wm-center" min="10" max="100" step="1" value="75"><span class="qout" id="wm-center-out">75%</span></div>
-        <p class="wm-note" id="wm-note" hidden>Company name, contact, logo and style are remembered in this browser for next time. The address isn’t.</p>
+        <p class="wm-note" id="wm-note" hidden>Everything here is saved in this browser, so it’s filled in next time. <button class="link-btn" id="wm-forget" type="button">Clear saved details</button></p>
       </div>
     </div>
 
@@ -546,6 +546,32 @@ const $ = id => document.getElementById(id);
 const plural = (n, word) => n + ' ' + word + (n === 1 ? '' : 's');
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/* ── Remembered settings ──
+   Kept in this browser's local storage so they're filled in next time. Nothing leaves the device. */
+const prefs = (() => {
+  const KEY = 'fileTools.prefs.v1';
+  let store = null, data = {}, timer = null;
+  try {
+    localStorage.setItem(KEY + '.test', '1'); localStorage.removeItem(KEY + '.test');
+    store = localStorage;
+    const saved = JSON.parse(store.getItem(KEY) || '{}');
+    if (saved && typeof saved === 'object' && !Array.isArray(saved)) data = saved;
+  } catch (e) {}
+  const flush = () => {
+    clearTimeout(timer); timer = null;
+    if (store) try { store.setItem(KEY, JSON.stringify(data)); } catch (e) {}
+  };
+  // Save straight away if the page is closed or hidden before the short delay runs out.
+  window.addEventListener('pagehide', () => { if (timer) flush(); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && timer) flush(); });
+  return {
+    get: (k, fallback) => (Object.prototype.hasOwnProperty.call(data, k) ? data[k] : fallback),
+    num: (k, min, max, fallback) => { const v = data[k]; return typeof v === 'number' && v >= min && v <= max ? v : fallback; },
+    pick: (k, allowed, fallback) => (allowed.includes(data[k]) ? data[k] : fallback),
+    set: (k, v) => { data[k] = v; if (store && !timer) timer = setTimeout(flush, 300); }
+  };
+})();
+
 function el(tag, cls, text) {
   const e = document.createElement(tag);
   if (cls) e.className = cls;
@@ -683,7 +709,8 @@ async function thumbFrom(img, max) {
         sum = $('heic-summary'), qual = $('heic-quality'), qout = $('heic-qout');
   let items = [], busy = false, nextId = 1;
 
-  qual.addEventListener('input', () => { qout.textContent = qual.value + '%'; });
+  qual.value = prefs.num('heicQuality', 50, 100, 90); qout.textContent = qual.value + '%';
+  qual.addEventListener('input', () => { qout.textContent = qual.value + '%'; prefs.set('heicQuality', +qual.value); });
   setupDrop('heic-drop', 'heic-input', add);
 
   function add(newFiles) {
@@ -923,14 +950,18 @@ async function thumbFrom(img, max) {
   });
   logoClear.addEventListener('click', () => { logo = null; changed({}); });
 
-  /* ── Remembered settings: everything but the address, which changes with each property ── */
+  /* ── Remembered settings: everything entered here, including the last address ── */
   const store = (() => {
     try { localStorage.setItem(STORE + '.test', '1'); localStorage.removeItem(STORE + '.test'); return localStorage; }
     catch (e) { return null; }
   })();
   function queueSave() { if (store) { clearTimeout(saveTimer); saveTimer = setTimeout(save, 400); } }
+  const flushSave = () => { if (saveTimer) save(); };
+  window.addEventListener('pagehide', flushSave);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushSave(); });
   function save() {
-    const data = { company: S.company, contact: S.contact, color: S.color, shadow: S.shadow, size: S.size, center: S.center };
+    clearTimeout(saveTimer); saveTimer = null;
+    const data = { addr: S.addr, company: S.company, contact: S.contact, color: S.color, shadow: S.shadow, size: S.size, center: S.center };
     try { store.setItem(STORE, JSON.stringify(logo ? { ...data, logo: { src: logo.src, name: logo.name } } : data)); }
     catch (e) { try { store.setItem(STORE, JSON.stringify(data)); } catch (e2) {} }   // a very large logo may not fit
   }
@@ -940,7 +971,7 @@ async function thumbFrom(img, max) {
     let data = null;
     try { data = JSON.parse(store.getItem(STORE) || 'null'); } catch (e) {}
     if (!data || typeof data !== 'object') return;
-    for (const key of ['company', 'contact']) if (typeof data[key] === 'string') S[key] = data[key];
+    for (const key of ['addr', 'company', 'contact']) if (typeof data[key] === 'string') S[key] = data[key];
     if (/^#[0-9a-f]{6}$/i.test(data.color || '')) S.color = data.color.toLowerCase();
     if (typeof data.shadow === 'boolean') S.shadow = data.shadow;
     if (data.size >= 60 && data.size <= 160) S.size = +data.size;
@@ -948,6 +979,13 @@ async function thumbFrom(img, max) {
     const l = data.logo;
     if (l && typeof l.src === 'string' && l.src.startsWith('data:image/')) await setLogo(l.src, String(l.name || 'logo'));
   }
+  $('wm-forget').addEventListener('click', () => {
+    if (!confirm('Clear the saved address, company name, contact and logo? The fields will be emptied.')) return;
+    logo = null;
+    changed({ addr: '', company: '', contact: '', color: '#ffffff', shadow: true, size: 100, center: 75 });
+    clearTimeout(saveTimer); saveTimer = null;
+    try { store.removeItem(STORE); } catch (e) {}
+  });
 
   /* ── Images ── */
   setupDrop('wm-drop', 'wm-input', add);
@@ -1164,13 +1202,15 @@ async function thumbFrom(img, max) {
   let items = [], nextId = 1, prepChain = Promise.resolve(), lastPdf = null, building = false, dragId = null;
 
   // US Letter for North America, A4 elsewhere.
-  sizeSel.value = /^(en-US|en-CA|es-US|es-MX|fr-CA)$/i.test(navigator.language || '') ? 'letter' : 'a4';
+  sizeSel.value = prefs.pick('pdfPageSize', ['letter', 'a4', 'fit'],
+    /^(en-US|en-CA|es-US|es-MX|fr-CA)$/i.test(navigator.language || '') ? 'letter' : 'a4');
+  marginSel.value = prefs.pick('pdfMargin', ['0', '18', '36'], '36');
   const syncMargin = () => {
     marginSel.disabled = sizeSel.value === 'fit';
     marginLabel.classList.toggle('disabled', marginSel.disabled);
   };
-  sizeSel.addEventListener('change', () => { syncMargin(); lastPdf = null; render(); });
-  marginSel.addEventListener('change', () => { lastPdf = null; render(); });
+  sizeSel.addEventListener('change', () => { syncMargin(); lastPdf = null; render(); prefs.set('pdfPageSize', sizeSel.value); });
+  marginSel.addEventListener('change', () => { lastPdf = null; render(); prefs.set('pdfMargin', marginSel.value); });
   syncMargin();
 
   setupDrop('img-drop', 'img-input', add);
@@ -1425,6 +1465,8 @@ function startPdfEditor() {
   let view = null;                         // { pg, vp1 }: the page in the preview and its scale-1 viewport
 
   dropWrap.hidden = false;
+  optEditable.checked = prefs.get('keepTextEditable', true) !== false;
+  optEditable.addEventListener('change', () => prefs.set('keepTextEditable', optEditable.checked));
 
   setupDrop('pdf-drop', 'pdf-input', async files => {
     const pdfs = files.filter(isPdf);
@@ -1866,6 +1908,14 @@ function startPdfEditor() {
   const LINE = 1.2, BASELINE = 0.9374;      // baseline sits 0.9374em into a 1.2em line with Times metrics
   const GRIP_SVG = '<svg viewBox="0 0 8 12"><circle cx="2" cy="2" r="1.2"/><circle cx="6" cy="2" r="1.2"/><circle cx="2" cy="6" r="1.2"/><circle cx="6" cy="6" r="1.2"/><circle cx="2" cy="10" r="1.2"/><circle cx="6" cy="10" r="1.2"/></svg>';
   const textDefaults = { size: 12, bold: false, italic: false, color: '#000000' };
+  (() => {                                   // the last style used, so new text starts the same way
+    const v = prefs.get('textStyle', null);
+    if (!v || typeof v !== 'object') return;
+    if (Array.from(sizeSel.options).some(o => +o.value === v.size)) textDefaults.size = v.size;
+    if (typeof v.bold === 'boolean') textDefaults.bold = v.bold;
+    if (typeof v.italic === 'boolean') textDefaults.italic = v.italic;
+    if (/^#[0-9a-f]{6}$/i.test(v.color || '')) textDefaults.color = v.color.toLowerCase();
+  })();
   const measureCtx = document.createElement('canvas').getContext('2d');
   let activeTextId = null, placing = false;
 
@@ -1979,6 +2029,7 @@ function startPdfEditor() {
   function setTextStyle(patch) {
     const t = textById(activeTextId); if (!t) return;
     Object.assign(t, patch); Object.assign(textDefaults, patch);  // the next text box starts with this style
+    prefs.set('textStyle', { ...textDefaults });
     const box = boxFor(t.id); if (box) layoutBox(box, t);
     syncTextBar();
   }
